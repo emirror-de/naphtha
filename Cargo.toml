@@ -1,0 +1,17 @@
+[package]
+name = "naphtha"
+version = "0.0.0"
+authors = ["Lewin Probst <info@emirror.de>"]
+edition = "2018"
+license = "MIT OR Apache-2.0"
+description = "Work in progress"
+homepage = "https://github.com/emirror-de/naphtha"
+documentation = "https://github.com/emirror-de/naphtha"
+repository = "https://github.com/emirror-de/naphtha"
+readme = "README.md"
+keywords = []
+categories = []
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
