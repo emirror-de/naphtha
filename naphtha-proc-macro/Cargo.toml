@@ -1,0 +1,21 @@
+[package]
+name = "naphtha-proc-macro"
+version = "0.1.0"
+authors = ["Lewin Probst <info@emirror.de>"]
+edition = "2018"
+license = "MIT OR Apache-2.0"
+description = "Work in progress"
+homepage = "https://github.com/emirror-de/naphtha"
+documentation = "https://github.com/emirror-de/naphtha"
+repository = "https://github.com/emirror-de/naphtha"
+readme = "README.md"
+keywords = []
+categories = []
+
+[lib]
+proc-macro = true
+
+[dependencies]
+syn = { version = "^1.0.74", features = ["parsing"] }
+proc-macro2 = "^1.0.28"
+quote = "^1.0.9"
