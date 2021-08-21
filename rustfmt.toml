@@ -1,0 +1,4 @@
+max_width = 80
+format_strings = false
+imports_layout = "HorizontalVertical"
+reorder_imports = true
