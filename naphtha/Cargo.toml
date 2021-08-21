@@ -1,0 +1,21 @@
+[package]
+name = "naphtha"
+version = "0.1.0"
+authors = ["Lewin Probst <info@emirror.de>"]
+edition = "2018"
+license = "MIT OR Apache-2.0"
+description = "Work in progress"
+homepage = "https://github.com/emirror-de/naphtha"
+documentation = "https://github.com/emirror-de/naphtha"
+repository = "https://github.com/emirror-de/naphtha"
+readme = "README.md"
+keywords = []
+categories = []
+
+[dependencies]
+diesel = { version = "^1.4.7", features = ["chrono"] }
+naphtha-proc-macro = { path = "../naphtha-proc-macro" }
+
+[dev-dependencies]
+diesel = { version = "^1.4.7", features = ["sqlite", "mysql", "postgres", "chrono"] }
+chrono = { version = "^0.4.19", features = ["serde"] }
