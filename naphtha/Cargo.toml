@@ -1,6 +1,6 @@
 [package]
 name = "naphtha"
-version = "0.1.0"
+version = "0.0.0"
 authors = ["Lewin Probst <info@emirror.de>"]
 edition = "2018"
 license = "MIT OR Apache-2.0"
@@ -22,5 +22,6 @@ naphtha-proc-macro = { path = "../naphtha-proc-macro" }
 log = "^0.4.14"
 
 [dev-dependencies]
+naphtha-proc-macro = { path = "../naphtha-proc-macro" }
 diesel = { version = "^1.4.7", features = ["sqlite", "mysql", "postgres", "chrono"] }
 chrono = { version = "^0.4.19", features = ["serde"] }

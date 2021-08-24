@@ -4,11 +4,10 @@
 //! the database that is used for specific models in your application without
 //! the requirement of changing any code.
 //!
-//! It handles the most common operations on a database like `insert`, `update`
+//! It implements the most common operations on a database like `insert`, `update`
 //! and `remove` for you, while also providing the ability to send custom queries
-//! to the database. It also implements the `query_by` methods that can be used
-//! to get a model from the database by filtering by one of its members. See the
-//! [examples](#examples) below.
+//! to the database.
+//! See the [examples](#examples) below.
 //!
 //! ## Features overview
 //!
