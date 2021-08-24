@@ -26,5 +26,25 @@ pub mod schema {
     }
 }
 
+impl naphtha::DatabaseModel for Person {
+    type PrimaryKey = i32;
+    fn primary_key(&self) -> Self::PrimaryKey {
+        self.id
+    }
+
+    fn set_primary_key(&mut self, value: &Self::PrimaryKey) {
+        self.id = *value;
+    }
+
+    fn default_primary_key() -> Self::PrimaryKey {
+        0
+    }
+
+    fn table_name() -> &'static str {
+        "persons"
+    }
+}
+
 fn main() {
+    println!("done!");
 }

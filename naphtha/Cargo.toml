@@ -12,9 +12,14 @@ readme = "README.md"
 keywords = []
 categories = []
 
+[features]
+default = ["sqlite"]
+sqlite = ["naphtha-proc-macro/sqlite"]
+
 [dependencies]
 diesel = { version = "^1.4.7", features = ["chrono"] }
 naphtha-proc-macro = { path = "../naphtha-proc-macro" }
+log = "^0.4.14"
 
 [dev-dependencies]
 diesel = { version = "^1.4.7", features = ["sqlite", "mysql", "postgres", "chrono"] }

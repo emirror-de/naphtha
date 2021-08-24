@@ -15,6 +15,10 @@ categories = []
 [lib]
 proc-macro = true
 
+[features]
+default = []
+sqlite = []
+
 [dependencies]
 syn = { version = "^1.0.74", features = ["parsing"] }
 proc-macro2 = "^1.0.28"
