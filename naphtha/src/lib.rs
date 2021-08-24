@@ -43,7 +43,7 @@
 //! #[macro_use]
 //! extern crate naphtha;
 //!
-//! use {naphtha::model, diesel::table};
+//! use {naphtha::{model, DatabaseModel, DatabaseUpdateHandler}, diesel::table};
 //!
 //! #[model(table_name = "persons")]
 //! pub struct Person {
@@ -60,7 +60,7 @@
 //!     }
 //! }
 //!
-//! impl naphtha::DatabaseModel for Person {
+//! impl DatabaseModel for Person {
 //!     type PrimaryKey = i32;
 //!     fn primary_key(&self) -> Self::PrimaryKey {
 //!         self.id
@@ -79,8 +79,10 @@
 //!     }
 //! }
 //!
+//! impl naphtha::DatabaseUpdateHandler for Person {}
+//!
 //! fn main() {
-//!     use naphtha::{DatabaseConnection, DatabaseConnect, DatabaseModel};
+//!     use naphtha::{DatabaseConnection, DatabaseConnect};
 //!     let db = DatabaseConnection::connect(":memory:").unwrap();
 //!     let mut p = Person {
 //!         id: Person::default_primary_key(),
@@ -156,7 +158,7 @@ pub trait DatabaseModel {
 /// Defines functions to modify the stored model instance on the database.
 pub trait DatabaseModelModifier<T>
 where
-    Self: Clone,
+    Self: DatabaseUpdateHandler + Clone,
 {
     /// Inserts `self` to the given database.
     /// *Updates the `primary_key` to the one that has been assigned by the database*.
@@ -166,4 +168,12 @@ where
     /// Updates `self` on the given database.
     /// *Updates the `updated_at` member if available before updating the database.*.
     fn update(&mut self, conn: &DatabaseConnection<T>) -> bool;
+}
+
+/// Contains methods that are called during updating the model to the database.
+pub trait DatabaseUpdateHandler {
+    /// This method is called before the transaction to the database takes place.
+    fn before_update(&mut self) {}
+    /// This method is called after the transaction to the database took place.
+    fn after_update(&mut self) {}
 }

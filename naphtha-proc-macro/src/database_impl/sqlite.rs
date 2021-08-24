@@ -47,7 +47,7 @@ fn impl_database_modifier(
         };
         impl DatabaseModelModifier<SqliteConnection> for #name
         where
-            Self: Clone,
+            Self: ::naphtha::DatabaseUpdateHandler + Clone,
         {
             fn insert(&mut self, conn: &DatabaseConnection<SqliteConnection>) -> bool {
                 use {
@@ -92,13 +92,16 @@ fn impl_database_modifier(
                         return false;
                     }
                 };
-                match self.save_changes::<Self>(&*c) {
+                self.before_update();
+                let update_result = match self.save_changes::<Self>(&*c) {
                     Ok(_) => true,
                     Err(msg) => {
                         error!("Failed updating entity:\n{:#?}", self);
                         return false;
                     },
-                }
+                };
+                self.after_update();
+                update_result
             }
 
             fn remove(self, conn: &DatabaseConnection<SqliteConnection>) -> bool {

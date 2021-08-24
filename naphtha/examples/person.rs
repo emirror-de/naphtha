@@ -2,7 +2,7 @@
 extern crate diesel;
 
 use chrono::prelude::NaiveDateTime;
-use naphtha_proc_macro::model;
+use naphtha::{model, DatabaseUpdateHandler};
 
 // The model attribute automatically adds:
 //
@@ -43,6 +43,14 @@ impl naphtha::DatabaseModel for Person {
     fn table_name() -> &'static str {
         "persons"
     }
+}
+
+impl DatabaseUpdateHandler for Person {
+    fn before_update(&mut self) {
+        self.updated_at = chrono::Utc::now().naive_utc();
+    }
+
+    fn after_update(&mut self) {}
 }
 
 fn main() {
