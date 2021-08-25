@@ -2,7 +2,11 @@
 extern crate diesel;
 
 use chrono::prelude::NaiveDateTime;
-use naphtha::{model, DatabaseUpdateHandler};
+use naphtha::{
+    barrel::{types, DatabaseSqlMigration, Migration},
+    model,
+    DatabaseUpdateHandler,
+};
 
 // The model attribute automatically adds:
 //
@@ -51,6 +55,26 @@ impl DatabaseUpdateHandler for Person {
     }
 
     fn after_update(&mut self) {}
+}
+
+#[cfg(any(
+    feature = "barrel-full",
+    feature = "barrel-sqlite",
+))]
+impl DatabaseSqlMigration for Person {
+    fn migration_up(migration: &mut Migration) {
+        use naphtha::DatabaseModel;
+        migration.create_table_if_not_exists(Self::table_name(), |t| {
+            t.add_column("id", types::primary());
+            t.add_column("description", types::text().nullable(true));
+            t.add_column("updated_at", types::custom("timestamp"));
+        });
+    }
+
+    fn migration_down(migration: &mut Migration) {
+        use naphtha::DatabaseModel;
+        migration.drop_table_if_exists(Self::table_name());
+    }
 }
 
 fn main() {

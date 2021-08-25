@@ -7,15 +7,16 @@
 //! It implements the most common operations on a database like `insert`, `update`
 //! and `remove` for you, while also providing the ability to send custom queries
 //! to the database.
+//! In addition to that, when using the `barrel-XXX` features, you can write your
+//! SQL migrations and use them in your application during runtime.
 //! See the [examples](#examples) below.
 //!
 //! ## Features overview
 //!
-//! * Change database on specific model in your application without the need to
-//! change your code.
 //! * Most common function implementations `insert`, `update`, `remove` for your
 //! models.
 //! * Possibility to query a model from the database by using one of its member *(NOT FINISHED YET)*.
+//! * Integrated [barrel] for writing your SQL migrations.
 //! * Thread safe handling of the database connection.
 //!
 //! ## Supported databases
@@ -44,6 +45,8 @@
 //! extern crate naphtha;
 //!
 //! use {naphtha::{model, DatabaseModel, DatabaseUpdateHandler}, diesel::table};
+//! #[cfg(any(feature = "barrel-full", feature = "barrel-sqlite"))]
+//! use naphtha::barrel::{types, DatabaseSqlMigration, Migration};
 //!
 //! #[model(table_name = "persons")]
 //! pub struct Person {
@@ -79,7 +82,29 @@
 //!     }
 //! }
 //!
+//! // do not implement custom changes before and after the update transaction
+//! // to the database.
 //! impl naphtha::DatabaseUpdateHandler for Person {}
+//!
+//! #[cfg(any(
+//!     feature = "barrel-full",
+//!     feature = "barrel-sqlite",
+//! ))]
+//! impl DatabaseSqlMigration for Person {
+//!     fn migration_up(migration: &mut Migration) {
+//!         use naphtha::DatabaseModel;
+//!         migration.create_table_if_not_exists(Self::table_name(), |t| {
+//!             t.add_column("id", types::primary());
+//!             t.add_column("description", types::text().nullable(true));
+//!             t.add_column("updated_at", types::custom("timestamp"));
+//!         });
+//!     }
+//!
+//!     fn migration_down(migration: &mut Migration) {
+//!         use naphtha::DatabaseModel;
+//!         migration.drop_table_if_exists(Self::table_name());
+//!     }
+//! }
 //!
 //! fn main() {
 //!     use naphtha::{DatabaseConnection, DatabaseConnect};
@@ -113,6 +138,13 @@ use std::sync::{Arc, Mutex, MutexGuard, PoisonError};
 /// supported.
 pub use naphtha_proc_macro::model;
 
+#[cfg(any(
+    feature = "barrel-full",
+    feature = "barrel-sqlite",
+))]
+/// Contains migration related traits as well as re-exported requirements from
+/// [barrel].
+pub mod barrel;
 mod database_impl;
 mod tests;
 

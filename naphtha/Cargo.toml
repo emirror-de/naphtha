@@ -13,10 +13,14 @@ keywords = []
 categories = []
 
 [features]
-default = ["sqlite"]
+default = ["full"]
+full = ["sqlite", "barrel-full"]
 sqlite = ["naphtha-proc-macro/sqlite"]
+barrel-full = ["barrel-sqlite"]
+barrel-sqlite = ["barrel-dep/sqlite3", "naphtha-proc-macro/barrel-sqlite"]
 
 [dependencies]
+barrel-dep = { path = "../../barrel", package = "barrel", optional = true }
 diesel = { version = "^1.4.7", features = ["chrono"] }
 naphtha-proc-macro = { path = "../naphtha-proc-macro" }
 log = "^0.4.14"

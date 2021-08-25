@@ -18,6 +18,7 @@ proc-macro = true
 [features]
 default = []
 sqlite = []
+barrel-sqlite = []
 
 [dependencies]
 syn = { version = "^1.0.74", features = ["parsing"] }
