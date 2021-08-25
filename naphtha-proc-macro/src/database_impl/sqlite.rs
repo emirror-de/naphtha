@@ -47,7 +47,7 @@ fn impl_database_modifier(
         };
         impl DatabaseModelModifier<SqliteConnection> for #name
         where
-            Self: ::naphtha::DatabaseUpdateHandler + Clone,
+            Self: ::naphtha::DatabaseUpdateHandler,
         {
             fn insert(&mut self, conn: &DatabaseConnection<SqliteConnection>) -> bool {
                 use {

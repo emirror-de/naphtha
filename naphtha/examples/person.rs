@@ -7,7 +7,7 @@ use naphtha::{model, DatabaseUpdateHandler};
 // The model attribute automatically adds:
 //
 // use schema::*;
-// #[derive(Debug, Clone, Queryable, Identifiable, AsChangeset, Associations)]
+// #[derive(Debug, Queryable, Identifiable, AsChangeset, Associations)]
 // #[table_name = "persons"]
 #[model(table_name = "persons")]
 pub struct Person {

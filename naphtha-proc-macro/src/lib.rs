@@ -25,7 +25,7 @@ pub fn model(
 
     let output = quote! {
         use schema::*;
-        #[derive(Debug, Clone, Queryable, Identifiable, AsChangeset, Associations)]
+        #[derive(Debug, Queryable, Identifiable, AsChangeset, Associations)]
         #attr
         #ast
         #[cfg(feature = "sqlite")]

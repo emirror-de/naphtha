@@ -158,7 +158,7 @@ pub trait DatabaseModel {
 /// Defines functions to modify the stored model instance on the database.
 pub trait DatabaseModelModifier<T>
 where
-    Self: DatabaseUpdateHandler + Clone,
+    Self: DatabaseUpdateHandler,
 {
     /// Inserts `self` to the given database.
     /// *Updates the `primary_key` to the one that has been assigned by the database*.
