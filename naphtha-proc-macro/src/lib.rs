@@ -9,6 +9,7 @@ use {
 #[cfg(any(feature = "barrel-full", feature = "barrel-sqlite",))]
 mod barrel_impl;
 mod database_impl;
+#[allow(dead_code)]
 mod helper;
 
 #[proc_macro_attribute]
@@ -22,17 +23,15 @@ pub fn model(
     let attr = format!("#[{}]", attr);
     let attr: ::proc_macro2::TokenStream = attr.parse().unwrap();
 
-    let impl_sqlite = if cfg!(feature = "sqlite") {
-        database_impl::sqlite::impl_sqlite(&ast, &attr)
-    } else {
-        quote! {}
-    };
-    let impl_barrel_sqlite =
-        if cfg!(feature = "barrel-full") || cfg!(feature = "barrel-sqlite") {
-            barrel_impl::sqlite::impl_sqlite()
-        } else {
-            quote! {}
-        };
+    #[cfg(not(feature = "sqlite"))]
+    let impl_sqlite = quote! {};
+    #[cfg(feature = "sqlite")]
+    let impl_sqlite = database_impl::sqlite::impl_sqlite(&ast, &attr);
+
+    #[cfg(not(any(feature = "barrel-full", feature = "barrel-sqlite")))]
+    let impl_barrel_sqlite = quote! {};
+    #[cfg(any(feature = "barrel-full", feature = "barrel-sqlite"))]
+    let impl_barrel_sqlite = barrel_impl::sqlite::impl_sqlite();
 
     let output = quote! {
         use schema::*;
