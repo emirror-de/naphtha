@@ -15,6 +15,10 @@
 //!
 //! * Most common function implementations `insert`, `update`, `remove` for your
 //! models.
+//! * [DatabaseUpdateHandler](DatabaseUpdateHandler) enables you to change the models values before and
+//! after the `update` transaction to the database.
+//! * Change database on specific model in your application without the need to
+//! change your code.
 //! * Possibility to query a model from the database by using one of its member *(NOT FINISHED YET)*.
 //! * Integrated [barrel] for writing your SQL migrations.
 //! * Thread safe handling of the database connection.
@@ -142,8 +146,7 @@ pub use naphtha_proc_macro::model;
     feature = "barrel-full",
     feature = "barrel-sqlite",
 ))]
-/// Contains migration related traits as well as re-exported requirements from
-/// [barrel].
+/// Re-exports the [barrel] crate including small additions required by naphtha.
 pub mod barrel;
 mod database_impl;
 mod tests;
