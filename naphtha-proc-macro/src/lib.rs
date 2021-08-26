@@ -6,10 +6,7 @@ use {
     syn::{parse, DeriveInput},
 };
 
-#[cfg(any(
-    feature = "barrel-full",
-    feature = "barrel-sqlite",
-))]
+#[cfg(any(feature = "barrel-full", feature = "barrel-sqlite",))]
 mod barrel_impl;
 mod database_impl;
 mod helper;
@@ -25,10 +22,17 @@ pub fn model(
     let attr = format!("#[{}]", attr);
     let attr: ::proc_macro2::TokenStream = attr.parse().unwrap();
 
-    #[cfg(feature = "sqlite")]
-    let impl_sqlite = database_impl::sqlite::impl_sqlite(&ast, &attr);
-    #[cfg(any(feature = "barrel-full", feature = "barrel-sqlite"))]
-    let impl_barrel_sqlite = barrel_impl::sqlite::impl_sqlite();
+    let impl_sqlite = if cfg!(feature = "sqlite") {
+        database_impl::sqlite::impl_sqlite(&ast, &attr)
+    } else {
+        quote! {}
+    };
+    let impl_barrel_sqlite =
+        if cfg!(feature = "barrel-full") || cfg!(feature = "barrel-sqlite") {
+            barrel_impl::sqlite::impl_sqlite()
+        } else {
+            quote! {}
+        };
 
     let output = quote! {
         use schema::*;
@@ -36,9 +40,7 @@ pub fn model(
         #attr
         #ast
 
-        #[cfg(feature = "sqlite")]
         #impl_sqlite
-        #[cfg(any(feature = "barrel-full", feature = "barrel-sqlite"))]
         #impl_barrel_sqlite
     };
 
