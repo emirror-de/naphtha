@@ -78,5 +78,36 @@ impl DatabaseSqlMigration for Person {
 }
 
 fn main() {
-    println!("done!");
+    use naphtha::{
+        barrel::DatabaseSqlMigrationExecutor,
+        DatabaseConnect,
+        DatabaseConnection,
+        DatabaseModel,
+    };
+
+    let db = DatabaseConnection::connect(":memory:").unwrap();
+
+    // create the table if not existent
+    // This method can be used on startup of your application to make sure
+    // your database schema is always up to date.
+    Person::execute_migration_up(&db);
+
+    let mut p = Person {
+        id: Person::default_primary_key(),
+        description: Some("The new person is registered".into()),
+        updated_at: chrono::Utc::now().naive_utc(),
+    };
+
+    p.insert(&db);
+    // id member is set to the correct number given by the database.
+
+    // do a custom query to the database
+    let res = db.custom::<diesel::result::QueryResult<Person>>(|c| {
+        use schema::persons::dsl::*;
+        persons.filter(id.eq(1)).first(c)
+    });
+    println!("{:#?}", res);
+
+    p.remove(&db);
+    // p not available anymore
 }
