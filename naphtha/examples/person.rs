@@ -57,10 +57,7 @@ impl DatabaseUpdateHandler for Person {
     fn after_update(&mut self) {}
 }
 
-#[cfg(any(
-    feature = "barrel-full",
-    feature = "barrel-sqlite",
-))]
+#[cfg(any(feature = "barrel-full", feature = "barrel-sqlite",))]
 impl DatabaseSqlMigration for Person {
     fn migration_up(migration: &mut Migration) {
         use naphtha::DatabaseModel;
@@ -81,7 +78,6 @@ fn main() {
     use naphtha::{
         barrel::DatabaseSqlMigrationExecutor,
         DatabaseConnect,
-        DatabaseConnection,
         DatabaseModel,
     };
 
@@ -90,7 +86,10 @@ fn main() {
     // create the table if not existent
     // This method can be used on startup of your application to make sure
     // your database schema is always up to date.
-    Person::execute_migration_up(&db);
+    match Person::execute_migration_up(&db) {
+        Ok(_) => (),
+        Err(msg) => println!("Could not create table: {}", msg.to_string()),
+    };
 
     let mut p = Person {
         id: Person::default_primary_key(),
