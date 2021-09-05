@@ -92,7 +92,7 @@ fn impl_database_modifier(
                         return false;
                     }
                 };
-                self.before_update();
+                self.pre_update();
                 let update_result = match self.save_changes::<Self>(&*c) {
                     Ok(_) => true,
                     Err(msg) => {
@@ -100,7 +100,7 @@ fn impl_database_modifier(
                         return false;
                     },
                 };
-                self.after_update();
+                self.post_update();
                 update_result
             }
 

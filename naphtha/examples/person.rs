@@ -50,11 +50,11 @@ impl naphtha::DatabaseModel for Person {
 }
 
 impl DatabaseUpdateHandler for Person {
-    fn before_update(&mut self) {
+    fn pre_update(&mut self) {
         self.updated_at = chrono::Utc::now().naive_utc();
     }
 
-    fn after_update(&mut self) {}
+    fn post_update(&mut self) {}
 }
 
 #[cfg(any(feature = "barrel-full", feature = "barrel-sqlite",))]
