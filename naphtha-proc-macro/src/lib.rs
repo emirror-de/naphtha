@@ -9,6 +9,7 @@ use {
 #[cfg(any(feature = "barrel-full", feature = "barrel-sqlite",))]
 mod barrel_impl;
 mod database_impl;
+mod database_traits;
 #[allow(dead_code)]
 mod helper;
 
@@ -22,6 +23,13 @@ pub fn model(
     );
     let attr = format!("#[{}]", attr);
     let attr: ::proc_macro2::TokenStream = attr.parse().unwrap();
+
+    // QUERY BY PROPERTY TRAIT
+    #[cfg(not(any(feature = "full", feature = "sqlite")))]
+    let impl_trait_query_by_properties = quote! {};
+    #[cfg(any(feature = "full", feature = "sqlite"))]
+    let impl_trait_query_by_properties =
+        database_traits::impl_trait_query_by_properties(&ast);
 
     #[cfg(not(feature = "sqlite"))]
     let impl_sqlite = quote! {};
@@ -38,6 +46,8 @@ pub fn model(
         #[derive(Debug, Queryable, Identifiable, AsChangeset, Associations)]
         #attr
         #ast
+
+        #impl_trait_query_by_properties
 
         #impl_sqlite
         #impl_barrel_sqlite
