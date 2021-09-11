@@ -121,7 +121,7 @@
 //!     // id member is set to the correct number given by the database.
 //!
 //!     // do a custom query to the database
-//!     db.custom::<diesel::result::QueryResult::<Person>>(|c| {
+//!     db.custom::<diesel::result::QueryResult::<Person>, _>(|c| {
 //!         use schema::{persons, persons::dsl::*};
 //!         persons.filter(id.eq(1)).first(c)
 //!     });
@@ -142,10 +142,7 @@ use std::sync::{Arc, Mutex, MutexGuard, PoisonError};
 /// supported.
 pub use naphtha_proc_macro::model;
 
-#[cfg(any(
-    feature = "barrel-full",
-    feature = "barrel-sqlite",
-))]
+#[cfg(any(feature = "barrel-full", feature = "barrel-sqlite",))]
 /// Re-exports the [barrel] crate including small additions required by naphtha.
 pub mod barrel;
 mod database_impl;
@@ -163,7 +160,10 @@ impl<T> DatabaseConnection<T> {
     }
 
     /// Executes the custom function to the database instance.
-    pub fn custom<R>(&self, query: fn(&T) -> R) -> R {
+    pub fn custom<R, F>(&self, query: F) -> R
+    where
+        F: Fn(&T) -> R,
+    {
         let c = self.0.lock().expect("Could not aquire connection lock!");
         query(&*c)
     }
@@ -208,7 +208,7 @@ where
 /// Contains methods that are called during updating the model to the database.
 pub trait DatabaseUpdateHandler {
     /// This method is called before the transaction to the database takes place.
-    fn before_update(&mut self) {}
+    fn pre_update(&mut self) {}
     /// This method is called after the transaction to the database took place.
-    fn after_update(&mut self) {}
+    fn post_update(&mut self) {}
 }

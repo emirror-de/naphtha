@@ -50,11 +50,11 @@ impl naphtha::DatabaseModel for Person {
 }
 
 impl DatabaseUpdateHandler for Person {
-    fn before_update(&mut self) {
+    fn pre_update(&mut self) {
         self.updated_at = chrono::Utc::now().naive_utc();
     }
 
-    fn after_update(&mut self) {}
+    fn post_update(&mut self) {}
 }
 
 #[cfg(any(feature = "barrel-full", feature = "barrel-sqlite",))]
@@ -88,7 +88,7 @@ fn main() {
     // your database schema is always up to date.
     match Person::execute_migration_up(&db) {
         Ok(_) => (),
-        Err(msg) => println!("Could not create table: {}", msg.to_string()),
+        Err(msg) => println!("Could not create table: {}", msg),
     };
 
     let mut p = Person {
@@ -101,11 +101,13 @@ fn main() {
     // id member is set to the correct number given by the database.
 
     // do a custom query to the database
-    let res = db.custom::<diesel::result::QueryResult<Person>>(|c| {
+    let res = db.custom::<diesel::result::QueryResult<Person>, _>(|c| {
         use schema::persons::dsl::*;
         persons.filter(id.eq(1)).first(c)
     });
+    let queried_by_id = Person::query_by_id(&db, &1);
     println!("{:#?}", res);
+    println!("{:#?}", queried_by_id);
 
     p.remove(&db);
     // p not available anymore

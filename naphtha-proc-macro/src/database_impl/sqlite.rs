@@ -8,8 +8,10 @@ pub(crate) fn impl_sqlite(
     attr: &::proc_macro2::TokenStream,
 ) -> ::proc_macro2::TokenStream {
     let database_modifier = impl_database_modifier(ast, attr);
+    let query_by_property = impl_query_by_property(ast, attr);
     quote! {
         #database_modifier
+        #query_by_property
     }
 }
 
@@ -92,7 +94,7 @@ fn impl_database_modifier(
                         return false;
                     }
                 };
-                self.before_update();
+                self.pre_update();
                 let update_result = match self.save_changes::<Self>(&*c) {
                     Ok(_) => true,
                     Err(msg) => {
@@ -100,7 +102,7 @@ fn impl_database_modifier(
                         return false;
                     },
                 };
-                self.after_update();
+                self.post_update();
                 update_result
             }
 
@@ -160,4 +162,104 @@ fn generate_insert_properties(ast: &DeriveInput) -> ::proc_macro2::TokenStream {
         };
     }
     collected_properties
+}
+
+pub fn impl_query_by_property(
+    ast: &::syn::DeriveInput,
+    table_name_attr: &::proc_macro2::TokenStream,
+) -> ::proc_macro2::TokenStream {
+    let name = &ast.ident;
+    let table_name = crate::helper::extract_table_name(table_name_attr);
+    let data = match &ast.data {
+        ::syn::Data::Struct(data) => data,
+        _ => {
+            // return no code if it is not a struct
+            return quote! {};
+        }
+    };
+    let mut queries = quote! {};
+    for field in data.fields.iter() {
+        if field.ident.is_none() {
+            continue;
+        }
+        let fieldname = field.ident.as_ref().unwrap();
+        let (return_type, diesel_query_fn) = match &fieldname.to_string()[..] {
+            "updated_at" => continue,
+            "id" => (quote! { Self }, quote! { first }),
+            _ => (quote! { Vec<Self> }, quote! { load }),
+        };
+        let function_name = ::proc_macro2::Ident::new(
+            &format!("query_by_{}", fieldname).to_lowercase(),
+            ::proc_macro2::Span::call_site(),
+        );
+        let fieldtype = &field.ty;
+        let query = quote! {
+                fn #function_name(conn: &DatabaseConnection<SqliteConnection>, property: &#fieldtype)
+                    -> ::diesel::result::QueryResult<#return_type> {
+                    use schema::{#table_name, #table_name::dsl::*};
+                    conn.custom::<::diesel::result::QueryResult<#return_type>, _>(|c| {
+                        #table_name.filter(#fieldname.eq(property))
+                            .#diesel_query_fn::<Self>(&*c)
+                    })
+                }
+        };
+        queries = quote! {
+            #queries
+            #query
+        };
+    }
+
+    let query_by_ids = if crate::helper::has_id(ast) {
+        impl_query_by_ids(ast, table_name_attr)
+    } else {
+        quote! {}
+    };
+
+    quote! {
+        impl QueryByProperties<SqliteConnection> for #name {
+            type Error = ::diesel::result::Error;
+            #queries
+            #query_by_ids
+        }
+    }
+}
+
+fn impl_query_by_ids(
+    ast: &::syn::DeriveInput,
+    table_name_attr: &::proc_macro2::TokenStream,
+) -> ::proc_macro2::TokenStream {
+    let table_name = crate::helper::extract_table_name(table_name_attr);
+    let data = match &ast.data {
+        ::syn::Data::Struct(data) => data,
+        _ => {
+            // return only defaults if it is not a struct
+            return quote! {};
+        }
+    };
+    let mut query = quote! {};
+    for field in data.fields.iter() {
+        if field.ident.is_none() {
+            continue;
+        }
+        let fieldname = field.ident.as_ref().unwrap();
+        match &fieldname.to_string()[..] {
+            "id" => (),
+            _ => continue,
+        };
+        let fieldtype = &field.ty;
+        query = quote! {
+                fn query_by_ids(conn: &DatabaseConnection<SqliteConnection>, ids: &[#fieldtype])
+                    -> ::diesel::result::QueryResult<Vec<Self>> {
+                    use {
+                        schema::{#table_name, #table_name::dsl::*},
+                    };
+                    conn.custom::<::diesel::result::QueryResult<Vec<Self>>, _>(|c| {
+                        #table_name.filter(#fieldname.eq_any(ids)).load::<Self>(&*c)
+                    })
+                }
+        };
+        break;
+    }
+
+    query
 }
