@@ -24,6 +24,13 @@ pub fn model(
     let attr = format!("#[{}]", attr);
     let attr: ::proc_macro2::TokenStream = attr.parse().unwrap();
 
+    // QUERY BY PROPERTY TRAIT
+    #[cfg(not(any(feature = "full", feature = "sqlite")))]
+    let impl_trait_query_by_properties = quote! {};
+    #[cfg(any(feature = "full", feature = "sqlite"))]
+    let impl_trait_query_by_properties =
+        database_traits::impl_trait_query_by_properties(&ast);
+
     #[cfg(not(feature = "sqlite"))]
     let impl_sqlite = quote! {};
     #[cfg(feature = "sqlite")]
@@ -39,6 +46,8 @@ pub fn model(
         #[derive(Debug, Queryable, Identifiable, AsChangeset, Associations)]
         #attr
         #ast
+
+        #impl_trait_query_by_properties
 
         #impl_sqlite
         #impl_barrel_sqlite

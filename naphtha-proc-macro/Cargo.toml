@@ -17,6 +17,8 @@ proc-macro = true
 
 [features]
 default = []
+full = ["sqlite", "barrel-full"]
+barrel-full = ["barrel-sqlite"]
 sqlite = []
 barrel-sqlite = []
 

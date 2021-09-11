@@ -105,7 +105,9 @@ fn main() {
         use schema::persons::dsl::*;
         persons.filter(id.eq(1)).first(c)
     });
+    let queried_by_id = Person::query_by_id(&db, &1);
     println!("{:#?}", res);
+    println!("{:#?}", queried_by_id);
 
     p.remove(&db);
     // p not available anymore
