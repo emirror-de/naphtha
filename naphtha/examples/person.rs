@@ -88,7 +88,7 @@ fn main() {
     // your database schema is always up to date.
     match Person::execute_migration_up(&db) {
         Ok(_) => (),
-        Err(msg) => println!("Could not create table: {}", msg.to_string()),
+        Err(msg) => println!("Could not create table: {}", msg),
     };
 
     let mut p = Person {
