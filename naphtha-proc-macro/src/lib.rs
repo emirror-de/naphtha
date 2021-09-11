@@ -9,6 +9,7 @@ use {
 #[cfg(any(feature = "barrel-full", feature = "barrel-sqlite",))]
 mod barrel_impl;
 mod database_impl;
+mod database_traits;
 #[allow(dead_code)]
 mod helper;
 
