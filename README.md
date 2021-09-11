@@ -8,8 +8,21 @@ SPDX-License-Identifier: MIT OR Apache-2.0
 
 [![License](https://img.shields.io/badge/license-MIT%2FApache--2.0-informational?style=flat-square)](COPYRIGHT.md)
 
-This crate is currently a _WORK IN PROGRESS_. Please checkout the [documentation page](https://docs.rs/naphtha) for information and examples.
+[![Crates.io](https://img.shields.io/crates/v/naphtha.svg)](https://crates.io/crates/naphtha) **naphtha**
 
+[![Crates.io](https://img.shields.io/crates/v/naphtha-proc-macro.svg)](https://crates.io/crates/naphtha-proc-macro) **naphtha-proc-macro**
+
+This crate is currently a _WORK IN PROGRESS_. Please checkout the [documentation page](https://docs.rs/naphtha) for information and examples (also see examples folder in [naphtha](./naphtha/examples))
+
+## Roadmap
+
+### v0.4.0
+
+* Adding support for PostgreSQL
+
+### v0.3.0
+
+* Adding support for MySQL
 
 ## Contributing
 
