@@ -16,10 +16,10 @@ pub fn impl_trait_query_by_properties(
             continue;
         }
         let fieldname = field.ident.as_ref().unwrap();
-        let (return_type, diesel_query_fn) = match &fieldname.to_string()[..] {
+        let return_type = match &fieldname.to_string()[..] {
             "updated_at" => continue,
-            "id" => (quote! { Self }, quote! { first }),
-            _ => (quote! { Vec<Self> }, quote! { load }),
+            "id" => quote! { Self },
+            _ => quote! { Vec<Self> },
         };
         let function_name = ::proc_macro2::Ident::new(
             &format!("query_by_{}", fieldname).to_lowercase(),

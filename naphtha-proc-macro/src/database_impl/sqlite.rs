@@ -228,7 +228,6 @@ fn impl_query_by_ids(
     ast: &::syn::DeriveInput,
     table_name_attr: &::proc_macro2::TokenStream,
 ) -> ::proc_macro2::TokenStream {
-    let name = &ast.ident;
     let table_name = crate::helper::extract_table_name(table_name_attr);
     let data = match &ast.data {
         ::syn::Data::Struct(data) => data,
