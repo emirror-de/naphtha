@@ -121,7 +121,7 @@
 //!     // id member is set to the correct number given by the database.
 //!
 //!     // do a custom query to the database
-//!     db.custom::<diesel::result::QueryResult::<Person>>(|c| {
+//!     db.custom::<diesel::result::QueryResult::<Person>, _>(|c| {
 //!         use schema::{persons, persons::dsl::*};
 //!         persons.filter(id.eq(1)).first(c)
 //!     });
@@ -163,7 +163,10 @@ impl<T> DatabaseConnection<T> {
     }
 
     /// Executes the custom function to the database instance.
-    pub fn custom<R>(&self, query: fn(&T) -> R) -> R {
+    pub fn custom<R, F>(&self, query: F) -> R
+    where
+        F: Fn(&T) -> R,
+    {
         let c = self.0.lock().expect("Could not aquire connection lock!");
         query(&*c)
     }

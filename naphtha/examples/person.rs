@@ -101,7 +101,7 @@ fn main() {
     // id member is set to the correct number given by the database.
 
     // do a custom query to the database
-    let res = db.custom::<diesel::result::QueryResult<Person>>(|c| {
+    let res = db.custom::<diesel::result::QueryResult<Person>, _>(|c| {
         use schema::persons::dsl::*;
         persons.filter(id.eq(1)).first(c)
     });
