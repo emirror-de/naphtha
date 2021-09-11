@@ -142,10 +142,7 @@ use std::sync::{Arc, Mutex, MutexGuard, PoisonError};
 /// supported.
 pub use naphtha_proc_macro::model;
 
-#[cfg(any(
-    feature = "barrel-full",
-    feature = "barrel-sqlite",
-))]
+#[cfg(any(feature = "barrel-full", feature = "barrel-sqlite",))]
 /// Re-exports the [barrel] crate including small additions required by naphtha.
 pub mod barrel;
 mod database_impl;
