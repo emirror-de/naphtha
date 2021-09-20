@@ -1,5 +1,19 @@
 # Changelog
 
+## v0.3.1
+
+### New features
+
+* Added `DatabaseInsertHandler` and `DatabaseRemoveHandler` to have the possibility to extend the CRUD model.
+
+### Changes
+
+None
+
+### Removals and deprecations
+
+None
+
 ## v0.2.0
 
 ### New features
