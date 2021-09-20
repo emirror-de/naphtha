@@ -49,7 +49,9 @@ fn impl_database_modifier(
         };
         impl DatabaseModelModifier<SqliteConnection> for #name
         where
-            Self: ::naphtha::DatabaseUpdateHandler,
+            Self: ::naphtha::DatabaseUpdateHandler<SqliteConnection>
+            + ::naphtha::DatabaseInsertHandler<SqliteConnection>
+            + ::naphtha::DatabaseRemoveHandler<SqliteConnection>,
         {
             fn insert(&mut self, conn: &DatabaseConnection<SqliteConnection>) -> bool {
                 use {
@@ -68,6 +70,7 @@ fn impl_database_modifier(
                         return false;
                     }
                 };
+                self.pre_insert(conn);
                 let res_id = match c.transaction::<_, ::diesel::result::Error, _>(|| {
                     diesel::insert_into(#table_name)
                         .values((#insert_properties))
@@ -83,6 +86,7 @@ fn impl_database_modifier(
                     }
                 };
                 self.set_primary_key(&res_id);
+                self.post_insert(conn);
                 true
             }
 
@@ -94,7 +98,7 @@ fn impl_database_modifier(
                         return false;
                     }
                 };
-                self.pre_update();
+                self.pre_update(conn);
                 let update_result = match self.save_changes::<Self>(&*c) {
                     Ok(_) => true,
                     Err(msg) => {
@@ -102,11 +106,11 @@ fn impl_database_modifier(
                         return false;
                     },
                 };
-                self.post_update();
+                self.post_update(conn);
                 update_result
             }
 
-            fn remove(self, conn: &DatabaseConnection<SqliteConnection>) -> bool {
+            fn remove(&mut self, conn: &DatabaseConnection<SqliteConnection>) -> bool {
                 use {
                     ::log::info,
                     ::naphtha::DatabaseModel,
@@ -119,12 +123,13 @@ fn impl_database_modifier(
                         return false;
                     }
                 };
+                self.pre_remove(conn);
                 let num_deleted = ::diesel::delete(
                     #table_name.filter(
                         #table_name.primary_key().eq(self.primary_key())
                     )
                 );
-                match num_deleted.execute(&*c) {
+                let num_deleted = match num_deleted.execute(&*c) {
                     Ok(_) => {
                         #[cfg(debug_assertions)]
                         info!("Removed entity with primary key {} from database!", self.primary_key());
@@ -134,7 +139,9 @@ fn impl_database_modifier(
                         error!("Could not aquire lock on DatabaseModifier::remove for model:\n{:#?}", self);
                         false
                     }
-                }
+                };
+                self.post_remove(conn);
+                num_deleted
             }
         }
     }
