@@ -1,10 +1,10 @@
 [package]
 name = "naphtha"
-version = "0.3.0"
+version = "0.3.1"
 authors = ["Lewin Probst <info@emirror.de>"]
 edition = "2018"
 license = "MIT OR Apache-2.0"
-description = "Work in progress"
+description = "Universal database connection layer for your application."
 homepage = "https://github.com/emirror-de/naphtha"
 documentation = "https://github.com/emirror-de/naphtha"
 repository = "https://github.com/emirror-de/naphtha"

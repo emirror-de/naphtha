@@ -48,7 +48,16 @@
 //! #[macro_use]
 //! extern crate naphtha;
 //!
-//! use {naphtha::{model, DatabaseModel, DatabaseUpdateHandler}, diesel::table};
+//! use {
+//!     naphtha::{
+//!         model,
+//!         DatabaseModel,
+//!         DatabaseInsertHandler,
+//!         DatabaseUpdateHandler,
+//!         DatabaseRemoveHandler
+//!     },
+//!     diesel::table
+//! };
 //! #[cfg(any(feature = "barrel-full", feature = "barrel-sqlite"))]
 //! use naphtha::barrel::{types, DatabaseSqlMigration, Migration};
 //!
@@ -86,9 +95,11 @@
 //!     }
 //! }
 //!
-//! // do not implement custom changes before and after the update transaction
+//! // do not implement custom changes before and after the transactions
 //! // to the database.
-//! impl naphtha::DatabaseUpdateHandler for Person {}
+//! impl<T> naphtha::DatabaseUpdateHandler<T> for Person {}
+//! impl<T> naphtha::DatabaseRemoveHandler<T> for Person {}
+//! impl<T> naphtha::DatabaseInsertHandler<T> for Person {}
 //!
 //! #[cfg(any(
 //!     feature = "barrel-full",
