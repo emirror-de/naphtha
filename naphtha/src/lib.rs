@@ -193,22 +193,52 @@ pub trait DatabaseModel {
 /// Defines functions to modify the stored model instance on the database.
 pub trait DatabaseModelModifier<T>
 where
-    Self: DatabaseUpdateHandler,
+    Self: DatabaseUpdateHandler<T>
+        + DatabaseInsertHandler<T>
+        + DatabaseRemoveHandler<T>,
 {
     /// Inserts `self` to the given database.
     /// *Updates the `primary_key` to the one that has been assigned by the database*.
     fn insert(&mut self, conn: &DatabaseConnection<T>) -> bool;
     /// Removes `self` from the database, selects by `id`.
-    fn remove(self, conn: &DatabaseConnection<T>) -> bool;
+    fn remove(&mut self, conn: &DatabaseConnection<T>) -> bool;
     /// Updates `self` on the given database.
     /// *Updates the `updated_at` member if available before updating the database.*.
     fn update(&mut self, conn: &DatabaseConnection<T>) -> bool;
 }
 
-/// Contains methods that are called during updating the model to the database.
-pub trait DatabaseUpdateHandler {
+/// Methods that are called before and after the transaction executed when
+/// the [insert] method is called.
+/// Can be used to do custom changes to the database or the model instance.
+/// Useful for extending the basic CRUD model.
+#[allow(unused_variables)]
+pub trait DatabaseInsertHandler<T> {
     /// This method is called before the transaction to the database takes place.
-    fn pre_update(&mut self) {}
+    fn pre_insert(&mut self, conn: &DatabaseConnection<T>) {}
     /// This method is called after the transaction to the database took place.
-    fn post_update(&mut self) {}
+    fn post_insert(&mut self, conn: &DatabaseConnection<T>) {}
+}
+
+/// Methods that are called before and after the transaction executed when
+/// the [update] method is called.
+/// Can be used to do custom changes to the database or the model instance.
+/// Useful for extending the basic CRUD model.
+#[allow(unused_variables)]
+pub trait DatabaseUpdateHandler<T> {
+    /// This method is called before the transaction to the database takes place.
+    fn pre_update(&mut self, conn: &DatabaseConnection<T>) {}
+    /// This method is called after the transaction to the database took place.
+    fn post_update(&mut self, conn: &DatabaseConnection<T>) {}
+}
+
+/// Methods that are called before and after the transaction executed when
+/// the [remove] method is called.
+/// Can be used to do custom changes to the database or the model instance.
+/// Useful for extending the basic CRUD model.
+#[allow(unused_variables)]
+pub trait DatabaseRemoveHandler<T> {
+    /// This method is called before the transaction to the database takes place.
+    fn pre_remove(&mut self, conn: &DatabaseConnection<T>) {}
+    /// This method is called after the transaction to the database took place.
+    fn post_remove(&mut self, conn: &DatabaseConnection<T>) {}
 }
