@@ -12,17 +12,23 @@ SPDX-License-Identifier: MIT OR Apache-2.0
 
 [![Crates.io](https://img.shields.io/crates/v/naphtha-proc-macro.svg)](https://crates.io/crates/naphtha-proc-macro) **naphtha-proc-macro**
 
-This crate is currently a _WORK IN PROGRESS_. Please checkout the [documentation page](https://docs.rs/naphtha) for information and examples (also see examples folder in [naphtha](./naphtha/examples))
+Please checkout the [documentation page](https://docs.rs/naphtha) for information and examples (also see examples folder in [naphtha](./naphtha/examples))
+
+If you have questions, want to contribute or have any other type of request, your invited to create an issue or visit the [openprobst.dev](https://openprobst.dev) discord server.
+
+![](https://img.shields.io/discord/855726181142495242?color=154683&label=discord&style=flat-square)
 
 ## Roadmap
 
-### v0.4.0
-
-* Adding support for PostgreSQL
-
-### v0.3.0
-
-* Adding support for MySQL
+- [x] Connect to database using a wrapper, defining the base for interchangeable Databases
+- [x] Implement support for `diesel::SQLiteConnection`
+- [x] Create traits to enable database interaction before and after the execution of the `insert`, `update` or `remove` transactions
+- [x] Implement `query_by_{property}` for querying models from the database using an exact match of the given property
+- [x] Thread safe sharing of the database connection
+- [x] Integrate `barrel` crate for writing migrations in Rust, available at runtime
+- [ ] Implement support for `diesel::MySqlConnection`
+- [ ] Implement support for `diesel::PgConnection`
+- [ ] More databases!!!
 
 ## Contributing
 
