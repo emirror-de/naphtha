@@ -8,7 +8,7 @@ SPDX-License-Identifier: MIT OR Apache-2.0
 
 [![License](https://img.shields.io/badge/license-MIT%2FApache--2.0-informational?style=flat-square)](COPYRIGHT.md)
 
-[![Crates.io](https://img.shields.io/crates/v/naphtha.svg)](https://crates.io/crates/naphtha) **naphtha**
+[![Crates.io](https://img.shields.io/crates/v/naphtha.svg)](https://crates.io/crates/naphtha) [![docs.rs](https://img.shields.io/docsrs/naphtha?style=flat-square)](https://docs.rs/naphtha) **naphtha**
 
 [![Crates.io](https://img.shields.io/crates/v/naphtha-proc-macro.svg)](https://crates.io/crates/naphtha-proc-macro) **naphtha-proc-macro**
 
