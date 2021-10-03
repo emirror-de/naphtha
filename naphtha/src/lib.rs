@@ -26,6 +26,7 @@
 //! ## Supported databases
 //!
 //! * SQlite3 (using [diesel](diesel) under the hood).
+//! * MySQL (using [diesel](diesel) under the hood).
 //!
 //! ## Examples
 //!
@@ -36,6 +37,7 @@
 //!
 //! ```rust
 //! use naphtha::{DatabaseConnection, DatabaseConnect};
+//! // This is the only line required to be changed to switch database types.
 //! type DbBackend = diesel::SqliteConnection;
 //! let db: DatabaseConnection<DbBackend> = DatabaseConnection::connect(":memory:").unwrap();
 //! // do some database work
