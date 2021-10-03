@@ -31,6 +31,7 @@ pub fn model(
     let impl_trait_query_by_properties =
         database_traits::impl_trait_query_by_properties(&ast);
 
+    // SQLITE
     #[cfg(not(feature = "sqlite"))]
     let impl_sqlite = quote! {};
     #[cfg(feature = "sqlite")]
@@ -41,8 +42,20 @@ pub fn model(
     #[cfg(any(feature = "barrel-full", feature = "barrel-sqlite"))]
     let impl_barrel_sqlite = barrel_impl::sqlite::impl_sqlite();
 
+    // MYSQL
+    let impl_mysql = if cfg!(feature = "mysql") {
+        database_impl::mysql::impl_mysql(&ast, &attr)
+    } else {
+        quote! {}
+    };
+
     let output = quote! {
         use schema::*;
+        #[cfg(any(feature = "sqlite", feature = "mysql"))]
+        use {
+            ::diesel::{backend::Backend, prelude::*},
+        };
+
         #[derive(Debug, Queryable, Identifiable, AsChangeset, Associations)]
         #attr
         #ast
@@ -51,6 +64,8 @@ pub fn model(
 
         #impl_sqlite
         #impl_barrel_sqlite
+
+        #impl_mysql
     };
 
     ::proc_macro::TokenStream::from(output)
