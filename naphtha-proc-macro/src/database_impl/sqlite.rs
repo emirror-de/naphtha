@@ -24,9 +24,7 @@ fn impl_database_modifier(
     //let table_name: syn::UsePath = syn::parse_quote! {#name::table_name()};
 
     let insert_properties = generate_insert_properties(ast);
-    if !crate::helper::has_id(ast) {
-        panic!("No `id` member found in model `{}`. Currently only models having an `id` column of type `i32` are supported.", name);
-    }
+    assert!(crate::helper::has_id(ast), "No `id` member found in model `{}`. Currently only models having an `id` column of type `i32` are supported.", name);
 
     /*
     let model_has_id_member = crate::helper::has_id(ast);

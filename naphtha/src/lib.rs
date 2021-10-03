@@ -219,7 +219,7 @@ where
 }
 
 /// Methods that are called before and after the transaction executed when
-/// the [insert] method is called.
+/// the [insert](DatabaseModelModifier::insert) method is called.
 /// Can be used to do custom changes to the database or the model instance.
 /// Useful for extending the basic CRUD model.
 #[allow(unused_variables)]
@@ -231,7 +231,7 @@ pub trait DatabaseInsertHandler<T> {
 }
 
 /// Methods that are called before and after the transaction executed when
-/// the [update] method is called.
+/// the [update](DatabaseModelModifier::update) method is called.
 /// Can be used to do custom changes to the database or the model instance.
 /// Useful for extending the basic CRUD model.
 #[allow(unused_variables)]
@@ -243,7 +243,7 @@ pub trait DatabaseUpdateHandler<T> {
 }
 
 /// Methods that are called before and after the transaction executed when
-/// the [remove] method is called.
+/// the [remove](DatabaseModelModifier::remove) method is called.
 /// Can be used to do custom changes to the database or the model instance.
 /// Useful for extending the basic CRUD model.
 #[allow(unused_variables)]
