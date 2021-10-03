@@ -40,18 +40,13 @@ fn impl_database_modifier(
     */
 
     quote! {
-        use {
-            ::diesel::{backend::Backend, prelude::*},
-            ::log::error,
-            ::naphtha::{DatabaseModelModifier, DatabaseConnection},
-        };
-        impl DatabaseModelModifier<SqliteConnection> for #name
+        impl ::naphtha::DatabaseModelModifier<SqliteConnection> for #name
         where
             Self: ::naphtha::DatabaseUpdateHandler<SqliteConnection>
             + ::naphtha::DatabaseInsertHandler<SqliteConnection>
             + ::naphtha::DatabaseRemoveHandler<SqliteConnection>,
         {
-            fn insert(&mut self, conn: &DatabaseConnection<SqliteConnection>) -> bool {
+            fn insert(&mut self, conn: &::naphtha::DatabaseConnection<SqliteConnection>) -> bool {
                 use {
                     ::naphtha::DatabaseModel,
                     schema::{#table_name, #table_name::dsl::*},
@@ -64,7 +59,7 @@ fn impl_database_modifier(
                 let c = match conn.lock() {
                     Ok(c) => c,
                     Err(msg) => {
-                        error!("Could not aquire lock on DatabaseModifier::insert for model:\n{:#?}", self);
+                        ::log::error!("Could not aquire lock on DatabaseModifier::insert for model:\n{:#?}", self);
                         return false;
                     }
                 };
@@ -79,7 +74,7 @@ fn impl_database_modifier(
                 }) {
                     Ok(v) => v,
                     Err(msg) => {
-                        error!("Failed inserting entity:\n{:#?}", self);
+                        ::log::error!("Failed inserting entity:\n{:#?}", self);
                         return false;
                     }
                 };
@@ -88,11 +83,11 @@ fn impl_database_modifier(
                 true
             }
 
-            fn update(&mut self, conn: &DatabaseConnection<SqliteConnection>) -> bool {
+            fn update(&mut self, conn: &::naphtha::DatabaseConnection<SqliteConnection>) -> bool {
                 let c = match conn.lock() {
                     Ok(c) => c,
                     Err(msg) => {
-                        error!("Could not aquire lock on DatabaseModifier::update for model:\n{:#?}", self);
+                        ::log::error!("Could not aquire lock on DatabaseModifier::update for model:\n{:#?}", self);
                         return false;
                     }
                 };
@@ -100,7 +95,7 @@ fn impl_database_modifier(
                 let update_result = match self.save_changes::<Self>(&*c) {
                     Ok(_) => true,
                     Err(msg) => {
-                        error!("Failed updating entity:\n{:#?}", self);
+                        ::log::error!("Failed updating entity:\n{:#?}", self);
                         return false;
                     },
                 };
@@ -108,7 +103,7 @@ fn impl_database_modifier(
                 update_result
             }
 
-            fn remove(&mut self, conn: &DatabaseConnection<SqliteConnection>) -> bool {
+            fn remove(&mut self, conn: &::naphtha::DatabaseConnection<SqliteConnection>) -> bool {
                 use {
                     ::log::info,
                     ::naphtha::DatabaseModel,
@@ -117,7 +112,7 @@ fn impl_database_modifier(
                 let c = match conn.lock() {
                     Ok(c) => c,
                     Err(msg) => {
-                        error!("Could not aquire lock on DatabaseModifier::remove for model:\n{:#?}", self);
+                        ::log::error!("Could not aquire lock on DatabaseModifier::remove for model:\n{:#?}", self);
                         return false;
                     }
                 };
@@ -134,7 +129,7 @@ fn impl_database_modifier(
                         true
                     },
                     Err(msg) => {
-                        error!("Could not aquire lock on DatabaseModifier::remove for model:\n{:#?}", self);
+                        ::log::error!("Could not aquire lock on DatabaseModifier::remove for model:\n{:#?}", self);
                         false
                     }
                 };
@@ -199,7 +194,7 @@ pub fn impl_query_by_property(
         );
         let fieldtype = &field.ty;
         let query = quote! {
-                fn #function_name(conn: &DatabaseConnection<SqliteConnection>, property: &#fieldtype)
+                fn #function_name(conn: &::naphtha::DatabaseConnection<SqliteConnection>, property: &#fieldtype)
                     -> ::diesel::result::QueryResult<#return_type> {
                     use schema::{#table_name, #table_name::dsl::*};
                     conn.custom::<::diesel::result::QueryResult<#return_type>, _>(|c| {
@@ -253,7 +248,7 @@ fn impl_query_by_ids(
         };
         let fieldtype = &field.ty;
         query = quote! {
-                fn query_by_ids(conn: &DatabaseConnection<SqliteConnection>, ids: &[#fieldtype])
+                fn query_by_ids(conn: &::naphtha::DatabaseConnection<SqliteConnection>, ids: &[#fieldtype])
                     -> ::diesel::result::QueryResult<Vec<Self>> {
                     use {
                         schema::{#table_name, #table_name::dsl::*},
