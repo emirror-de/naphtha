@@ -60,7 +60,7 @@
 //!     },
 //!     diesel::table
 //! };
-//! #[cfg(any(feature = "barrel-full", feature = "barrel-sqlite"))]
+//! #[cfg(any(feature = "barrel-sqlite", feature = "barrel-mysql"))]
 //! use naphtha::barrel::{types, DatabaseSqlMigration, Migration};
 //!
 //! // It is recommended to wrap the actual used database type in a crate-global
@@ -156,7 +156,7 @@ use std::sync::{Arc, Mutex, MutexGuard, PoisonError};
 /// supported.
 pub use naphtha_proc_macro::model;
 
-#[cfg(any(feature = "barrel-full", feature = "barrel-sqlite",))]
+#[cfg(any(feature = "barrel-sqlite", feature = "barrel-mysql",))]
 /// Re-exports the [barrel] crate including small additions required by naphtha.
 pub mod barrel;
 mod database_impl;
