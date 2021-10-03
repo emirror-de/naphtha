@@ -36,7 +36,8 @@
 //!
 //! ```rust
 //! use naphtha::{DatabaseConnection, DatabaseConnect};
-//! let db = DatabaseConnection::connect(":memory:");
+//! type DbBackend = diesel::SqliteConnection;
+//! let db: DatabaseConnection<DbBackend> = DatabaseConnection::connect(":memory:").unwrap();
 //! // do some database work
 //! ```
 //!
@@ -52,6 +53,7 @@
 //!     naphtha::{
 //!         model,
 //!         DatabaseModel,
+//!         DatabaseModelModifier,
 //!         DatabaseInsertHandler,
 //!         DatabaseUpdateHandler,
 //!         DatabaseRemoveHandler
@@ -60,6 +62,11 @@
 //! };
 //! #[cfg(any(feature = "barrel-full", feature = "barrel-sqlite"))]
 //! use naphtha::barrel::{types, DatabaseSqlMigration, Migration};
+//!
+//! // It is recommended to wrap the actual used database type in a crate-global
+//! // alias. If the database is changed later, this is the only line that needs
+//! // to be adjusted to the new database type.
+//! pub(crate) type DbBackend = diesel::SqliteConnection;
 //!
 //! #[model(table_name = "persons")]
 //! pub struct Person {
@@ -132,7 +139,7 @@
 //!     // id member is set to the correct number given by the database.
 //!
 //!     // do a custom query to the database
-//!     db.custom::<diesel::result::QueryResult::<Person>, _>(|c| {
+//!     db.custom::<diesel::result::QueryResult::<Person>, _>(|c: &DbBackend| {
 //!         use schema::{persons, persons::dsl::*};
 //!         persons.filter(id.eq(1)).first(c)
 //!     });
@@ -141,11 +148,7 @@
 //!     // p not available anymore
 //! }
 //! ```
-//!
-//! ## Upcoming
-//!
-//! * The query by methods will be implemented.
-//! * More databases will be implemented, at least PostgreSQL and MySql.
+
 use std::sync::{Arc, Mutex, MutexGuard, PoisonError};
 
 /// Defines your `struct` as a model and implements the required traits for

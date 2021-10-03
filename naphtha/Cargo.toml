@@ -14,8 +14,9 @@ categories = ["database"]
 
 [features]
 default = ["full"]
-full = ["sqlite", "barrel-full"]
+full = ["sqlite", "mysql", "barrel-full"]
 sqlite = ["naphtha-proc-macro/sqlite", "diesel/sqlite"]
+mysql = ["naphtha-proc-macro/mysql", "diesel/mysql"]
 barrel-full = ["barrel-sqlite"]
 barrel-sqlite = ["barrel-dep/sqlite3", "naphtha-proc-macro/barrel-sqlite"]
 
