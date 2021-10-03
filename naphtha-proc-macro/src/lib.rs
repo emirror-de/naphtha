@@ -6,7 +6,7 @@ use {
     syn::{parse, DeriveInput},
 };
 
-#[cfg(any(feature = "barrel-full", feature = "barrel-sqlite",))]
+#[cfg(any(feature = "barrel-sqlite", feature = "barrel-mysql"))]
 mod barrel_impl;
 mod database_impl;
 mod database_traits;
@@ -25,24 +25,41 @@ pub fn model(
     let attr: ::proc_macro2::TokenStream = attr.parse().unwrap();
 
     // QUERY BY PROPERTY TRAIT
-    #[cfg(not(any(feature = "full", feature = "sqlite")))]
+    #[cfg(not(any(feature = "sqlite", feature = "mysql")))]
     let impl_trait_query_by_properties = quote! {};
-    #[cfg(any(feature = "full", feature = "sqlite"))]
+    #[cfg(any(feature = "sqlite", feature = "mysql"))]
     let impl_trait_query_by_properties =
         database_traits::impl_trait_query_by_properties(&ast);
 
+    // SQLITE
     #[cfg(not(feature = "sqlite"))]
     let impl_sqlite = quote! {};
     #[cfg(feature = "sqlite")]
     let impl_sqlite = database_impl::sqlite::impl_sqlite(&ast, &attr);
 
-    #[cfg(not(any(feature = "barrel-full", feature = "barrel-sqlite")))]
+    #[cfg(not(feature = "barrel-sqlite"))]
     let impl_barrel_sqlite = quote! {};
-    #[cfg(any(feature = "barrel-full", feature = "barrel-sqlite"))]
+    #[cfg(feature = "barrel-sqlite")]
     let impl_barrel_sqlite = barrel_impl::sqlite::impl_sqlite();
+
+    // MYSQL
+    #[cfg(not(feature = "mysql"))]
+    let impl_mysql = quote! {};
+    #[cfg(feature = "mysql")]
+    let impl_mysql = database_impl::mysql::impl_mysql(&ast, &attr);
+
+    #[cfg(not(feature = "barrel-mysql"))]
+    let impl_barrel_mysql = quote! {};
+    #[cfg(feature = "barrel-mysql")]
+    let impl_barrel_mysql = barrel_impl::mysql::impl_mysql();
 
     let output = quote! {
         use schema::*;
+        #[cfg(any(feature = "sqlite", feature = "mysql"))]
+        use {
+            ::diesel::{backend::Backend, prelude::*},
+        };
+
         #[derive(Debug, Queryable, Identifiable, AsChangeset, Associations)]
         #attr
         #ast
@@ -51,6 +68,9 @@ pub fn model(
 
         #impl_sqlite
         #impl_barrel_sqlite
+
+        #impl_mysql
+        #impl_barrel_mysql
     };
 
     ::proc_macro::TokenStream::from(output)

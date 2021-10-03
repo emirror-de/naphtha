@@ -17,10 +17,12 @@ proc-macro = true
 
 [features]
 default = []
-full = ["sqlite", "barrel-full"]
-barrel-full = ["barrel-sqlite"]
+full = ["sqlite", "mysql", "barrel-full"]
+barrel-full = ["barrel-sqlite", "barrel-mysql"]
 sqlite = []
+mysql = []
 barrel-sqlite = []
+barrel-mysql = []
 
 [dependencies]
 syn = { version = "^1.0.74", features = ["parsing"] }

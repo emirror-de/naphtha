@@ -1,18 +1,48 @@
+// You can run this example on different databases (Docker files provided in
+// the repository root).
+// Select the database by compiling this example with the corresponding feature:
+// * sqlite
+// * mysql
+// Also make sure that the correct type DbBackend is uncommented, see below.
+
 #[macro_use]
 extern crate diesel;
 
 use chrono::prelude::NaiveDateTime;
 use naphtha::{
-    barrel::{types, DatabaseSqlMigration, Migration},
+    barrel::{
+        types,
+        DatabaseSqlMigration,
+        DatabaseSqlMigrationExecutor,
+        Migration,
+    },
     model,
+    DatabaseConnect,
+    DatabaseConnection,
     DatabaseInsertHandler,
+    DatabaseModel,
+    DatabaseModelModifier,
     DatabaseRemoveHandler,
     DatabaseUpdateHandler,
 };
 
+const DATABASE_URL: &'static str = if cfg!(feature = "sqlite") {
+    ":memory:"
+} else if cfg!(feature = "mysql") {
+    "mysql://naphtha:naphtha@127.0.0.1:3306/naphtha"
+} else {
+    "not supported"
+};
+
+//
+//type DbBackend = diesel::SqliteConnection;
+type DbBackend = diesel::MysqlConnection;
+
 // The model attribute automatically adds:
 //
 // use schema::*;
+// #[cfg(any(feature = "sqlite", feature = "mysql"))]
+// use diesel::{backend::Backend, prelude::*};
 // #[derive(Debug, Queryable, Identifiable, AsChangeset, Associations)]
 // #[table_name = "persons"]
 #[model(table_name = "persons")]
@@ -121,10 +151,9 @@ impl<T> DatabaseRemoveHandler<T> for Person {}
 //    }
 //}
 
-#[cfg(any(feature = "barrel-full", feature = "barrel-sqlite",))]
+#[cfg(any(feature = "barrel-sqlite", feature = "barrel-mysql",))]
 impl DatabaseSqlMigration for Person {
     fn migration_up(migration: &mut Migration) {
-        use naphtha::DatabaseModel;
         migration.create_table_if_not_exists(Self::table_name(), |t| {
             t.add_column("id", types::primary());
             t.add_column("description", types::text().nullable(true));
@@ -133,19 +162,13 @@ impl DatabaseSqlMigration for Person {
     }
 
     fn migration_down(migration: &mut Migration) {
-        use naphtha::DatabaseModel;
         migration.drop_table_if_exists(Self::table_name());
     }
 }
 
 fn main() {
-    use naphtha::{
-        barrel::DatabaseSqlMigrationExecutor,
-        DatabaseConnect,
-        DatabaseModel,
-    };
-
-    let db = DatabaseConnection::connect(":memory:").unwrap();
+    println!("Using {}", DATABASE_URL);
+    let db = DatabaseConnection::connect(DATABASE_URL).unwrap();
 
     // create the table if not existent
     // This method can be used on startup of your application to make sure
@@ -165,14 +188,20 @@ fn main() {
     // id member is set to the correct number given by the database.
 
     // do a custom query to the database
-    let res = db.custom::<diesel::result::QueryResult<Person>, _>(|c| {
-        use schema::persons::dsl::*;
-        persons.filter(id.eq(1)).first(c)
-    });
+    let res =
+        db.custom::<diesel::result::QueryResult<Person>, _>(|c: &DbBackend| {
+            use schema::persons::dsl::*;
+            persons.filter(id.eq(1)).first(c)
+        });
     let queried_by_id = Person::query_by_id(&db, &1);
     println!("{:#?}", res);
     println!("{:#?}", queried_by_id);
 
     p.remove(&db);
     // p not available anymore
+
+    match Person::execute_migration_down(&db) {
+        Ok(_) => (),
+        Err(msg) => println!("Could not drop table: {}", msg),
+    };
 }
