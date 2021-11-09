@@ -1,6 +1,6 @@
 [package]
 name = "naphtha"
-version = "0.3.1"
+version = "0.4.0"
 authors = ["Lewin Probst <info@emirror.de>"]
 edition = "2018"
 license = "MIT OR Apache-2.0"
@@ -9,7 +9,7 @@ homepage = "https://github.com/emirror-de/naphtha"
 documentation = "https://github.com/emirror-de/naphtha"
 repository = "https://github.com/emirror-de/naphtha"
 readme = "README.md"
-keywords = ["database", "interaction", "simplify", "models", "connection"]
+keywords = ["database", "interaction", "simplify", "models", "CRUD"]
 categories = ["database"]
 
 [features]
@@ -18,12 +18,12 @@ full = ["sqlite", "mysql", "barrel-full"]
 sqlite = ["naphtha-proc-macro/sqlite", "diesel/sqlite"]
 mysql = ["naphtha-proc-macro/mysql", "diesel/mysql"]
 barrel-full = ["barrel-sqlite"]
-barrel-sqlite = ["barrel-dep/sqlite3", "naphtha-proc-macro/barrel-sqlite"]
-barrel-mysql = ["barrel-dep/mysql", "naphtha-proc-macro/barrel-mysql"]
+barrel-sqlite = ["barrel/sqlite3", "naphtha-proc-macro/barrel-sqlite"]
+barrel-mysql = ["barrel/mysql", "naphtha-proc-macro/barrel-mysql"]
 
 [dependencies]
-barrel-dep = { version = "^0.6.6-alpha.0", package = "barrel", optional = true, git = "https://github.com/emirror-de/barrel.git" }
+barrel = { version = "^0.7.0", optional = true }
 chrono = { version = "^0.4.19" }
 diesel = { version = "^1.4.7", features = ["chrono"] }
-naphtha-proc-macro = { path = "../naphtha-proc-macro", version = "^0.3.0" }
+naphtha-proc-macro = { path = "../naphtha-proc-macro", version = "^0.4.0" }
 log = "^0.4.14"

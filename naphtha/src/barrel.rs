@@ -1,4 +1,5 @@
-pub use {crate::DatabaseConnection, barrel_dep::*};
+pub use crate::DatabaseConnection;
+use barrel::Migration;
 
 /// Provides an interface for the migration functions of the table belonging
 /// to your model.
