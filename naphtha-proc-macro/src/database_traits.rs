@@ -29,7 +29,7 @@ pub fn impl_trait_query_by_properties(
         let query = quote! {
                 /// Queries the database with by the given property. It only returns
                 /// those with an exact match.
-                fn #function_name(conn: &DatabaseConnection<DB>, property: &#fieldtype)
+                fn #function_name(conn: &::naphtha::DatabaseConnection<DB>, property: &#fieldtype)
                     -> Result<#return_type, Self::Error>;
         };
         queries = quote! {
@@ -80,7 +80,7 @@ fn impl_trait_query_by_ids(
         };
         let fieldtype = &field.ty;
         query = quote! {
-                fn query_by_ids(conn: &DatabaseConnection<DB>, ids: &[#fieldtype])
+                fn query_by_ids(conn: &::naphtha::DatabaseConnection<DB>, ids: &[#fieldtype])
                     -> Result<Vec<Self>, Self::Error>;
         };
         break;

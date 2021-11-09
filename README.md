@@ -16,7 +16,7 @@ Please checkout the [documentation page](https://docs.rs/naphtha) for informatio
 
 If you have questions, want to contribute or have any other type of request, your invited to create an issue or visit the [openprobst.dev](https://openprobst.dev) discord server.
 
-![](https://img.shields.io/discord/855726181142495242?color=154683&label=discord&style=flat-square)
+[![](https://img.shields.io/discord/855726181142495242?color=154683&label=discord&style=flat-square)](https://discord.gg/nx7YtsjEbT)
 
 ## Roadmap
 
@@ -26,7 +26,7 @@ If you have questions, want to contribute or have any other type of request, you
 - [x] Implement `query_by_{property}` for querying models from the database using an exact match of the given property
 - [x] Thread safe sharing of the database connection
 - [x] Integrate `barrel` crate for writing migrations in Rust, available at runtime
-- [ ] Implement support for `diesel::MySqlConnection`
+- [x] Implement support for `diesel::MySqlConnection`
 - [ ] Implement support for `diesel::PgConnection`
 - [ ] More databases!!!
 

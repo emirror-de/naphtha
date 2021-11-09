@@ -1,5 +1,22 @@
 # Changelog
 
+## v0.4.0
+
+### New features
+
+* Added support for `diesel::MysqlConnection` 
+* Added support for `MySql` barrel backend
+* Added `.tmuxp.yaml` file for better development
+* Added `docker-compose.yml` file with `MySQL` database for easy testing
+
+### Changes
+
+* Internal macro definition changes due to conflicting `use` statements
+
+### Removals and deprecations
+
+None
+
 ## v0.3.1
 
 ### New features

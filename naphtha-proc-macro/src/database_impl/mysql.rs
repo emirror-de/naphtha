@@ -3,7 +3,7 @@ use {
     syn::{Data::Struct, DeriveInput},
 };
 
-pub(crate) fn impl_sqlite(
+pub(crate) fn impl_mysql(
     ast: &DeriveInput,
     attr: &::proc_macro2::TokenStream,
 ) -> ::proc_macro2::TokenStream {
@@ -24,29 +24,20 @@ fn impl_database_modifier(
     //let table_name: syn::UsePath = syn::parse_quote! {#name::table_name()};
 
     let insert_properties = generate_insert_properties(ast);
-    assert!(crate::helper::has_id(ast), "No `id` member found in model `{}`. Currently only models having an `id` column of type `i32` are supported.", name);
-
-    /*
-    let model_has_id_member = crate::helper::has_id(ast);
-                    if (#model_has_id_member) {
-                        #table_name.select(#table_name.primary_key())
-                            .order(#table_name.primary_key().desc())
-                            .first(&*c)
-                    } else {
-                        #table_name.select(#table_name.primary_key())
-                            .filter(#table_name.primary_key().eq(self.primary_key()))
-                            .first(&*c)
-                    }
-    */
+    assert!(
+        crate::helper::has_id(ast),
+        "No `id` member found in model `{}`. Currently only models having an `id` column of type `i32` are supported.",
+        name
+        );
 
     quote! {
-        impl ::naphtha::DatabaseModelModifier<SqliteConnection> for #name
+        impl ::naphtha::DatabaseModelModifier<MysqlConnection> for #name
         where
-            Self: ::naphtha::DatabaseUpdateHandler<SqliteConnection>
-            + ::naphtha::DatabaseInsertHandler<SqliteConnection>
-            + ::naphtha::DatabaseRemoveHandler<SqliteConnection>,
+            Self: ::naphtha::DatabaseUpdateHandler<MysqlConnection>
+            + ::naphtha::DatabaseInsertHandler<MysqlConnection>
+            + ::naphtha::DatabaseRemoveHandler<MysqlConnection>,
         {
-            fn insert(&mut self, conn: &::naphtha::DatabaseConnection<SqliteConnection>) -> bool {
+            fn insert(&mut self, conn: &::naphtha::DatabaseConnection<MysqlConnection>) -> bool {
                 use {
                     ::naphtha::DatabaseModel,
                     schema::{#table_name, #table_name::dsl::*},
@@ -83,7 +74,7 @@ fn impl_database_modifier(
                 true
             }
 
-            fn update(&mut self, conn: &::naphtha::DatabaseConnection<SqliteConnection>) -> bool {
+            fn update(&mut self, conn: &::naphtha::DatabaseConnection<MysqlConnection>) -> bool {
                 let c = match conn.lock() {
                     Ok(c) => c,
                     Err(msg) => {
@@ -103,7 +94,7 @@ fn impl_database_modifier(
                 update_result
             }
 
-            fn remove(&mut self, conn: &::naphtha::DatabaseConnection<SqliteConnection>) -> bool {
+            fn remove(&mut self, conn: &::naphtha::DatabaseConnection<MysqlConnection>) -> bool {
                 use {
                     ::log::info,
                     ::naphtha::DatabaseModel,
@@ -194,7 +185,7 @@ pub fn impl_query_by_property(
         );
         let fieldtype = &field.ty;
         let query = quote! {
-                fn #function_name(conn: &::naphtha::DatabaseConnection<SqliteConnection>, property: &#fieldtype)
+                fn #function_name(conn: &::naphtha::DatabaseConnection<MysqlConnection>, property: &#fieldtype)
                     -> ::diesel::result::QueryResult<#return_type> {
                     use schema::{#table_name, #table_name::dsl::*};
                     conn.custom::<::diesel::result::QueryResult<#return_type>, _>(|c| {
@@ -216,7 +207,7 @@ pub fn impl_query_by_property(
     };
 
     quote! {
-        impl QueryByProperties<SqliteConnection> for #name {
+        impl QueryByProperties<MysqlConnection> for #name {
             type Error = ::diesel::result::Error;
             #queries
             #query_by_ids
@@ -248,7 +239,7 @@ fn impl_query_by_ids(
         };
         let fieldtype = &field.ty;
         query = quote! {
-                fn query_by_ids(conn: &::naphtha::DatabaseConnection<SqliteConnection>, ids: &[#fieldtype])
+                fn query_by_ids(conn: &::naphtha::DatabaseConnection<MysqlConnection>, ids: &[#fieldtype])
                     -> ::diesel::result::QueryResult<Vec<Self>> {
                     use {
                         schema::{#table_name, #table_name::dsl::*},

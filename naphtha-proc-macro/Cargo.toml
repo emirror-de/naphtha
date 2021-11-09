@@ -1,6 +1,6 @@
 [package]
 name = "naphtha-proc-macro"
-version = "0.3.0"
+version = "0.4.0"
 authors = ["Lewin Probst <info@emirror.de>"]
 edition = "2018"
 license = "MIT OR Apache-2.0"
@@ -17,10 +17,12 @@ proc-macro = true
 
 [features]
 default = []
-full = ["sqlite", "barrel-full"]
-barrel-full = ["barrel-sqlite"]
+full = ["sqlite", "mysql", "barrel-full"]
+barrel-full = ["barrel-sqlite", "barrel-mysql"]
 sqlite = []
+mysql = []
 barrel-sqlite = []
+barrel-mysql = []
 
 [dependencies]
 syn = { version = "^1.0.74", features = ["parsing"] }
