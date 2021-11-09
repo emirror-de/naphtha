@@ -26,7 +26,7 @@ If you have questions, want to contribute or have any other type of request, you
 - [x] Implement `query_by_{property}` for querying models from the database using an exact match of the given property
 - [x] Thread safe sharing of the database connection
 - [x] Integrate `barrel` crate for writing migrations in Rust, available at runtime
-- [ ] Implement support for `diesel::MySqlConnection`
+- [x] Implement support for `diesel::MySqlConnection`
 - [ ] Implement support for `diesel::PgConnection`
 - [ ] More databases!!!
 
