@@ -39,7 +39,7 @@ fn impl_database_modifier(
         {
             fn insert(&mut self, conn: &::naphtha::DatabaseConnection<MysqlConnection>) -> bool {
                 use {
-                    ::naphtha::DatabaseModel,
+                    ::naphtha::{log, DatabaseModel, diesel::{Connection, RunQueryDsl, ExpressionMethods, Table, QueryDsl}},
                     schema::{#table_name, #table_name::dsl::*},
                 };
                 // preventing duplicate insertion if default primary key gets
@@ -50,13 +50,13 @@ fn impl_database_modifier(
                 let c = match conn.lock() {
                     Ok(c) => c,
                     Err(msg) => {
-                        ::log::error!("Could not aquire lock on DatabaseModifier::insert for model:\n{:#?}", self);
+                        log::error!("Could not aquire lock on DatabaseModifier::insert for model:\n{:#?}", self);
                         return false;
                     }
                 };
                 self.pre_insert(conn);
-                let res_id = match c.transaction::<_, ::diesel::result::Error, _>(|| {
-                    diesel::insert_into(#table_name)
+                let res_id = match c.transaction::<_, ::naphtha::diesel::result::Error, _>(|| {
+                    ::naphtha::diesel::insert_into(#table_name)
                         .values((#insert_properties))
                         .execute(&*c)?;
                     #table_name.select(#table_name.primary_key())
@@ -65,7 +65,7 @@ fn impl_database_modifier(
                 }) {
                     Ok(v) => v,
                     Err(msg) => {
-                        ::log::error!("Failed inserting entity:\n{:#?}", self);
+                        log::error!("Failed inserting entity:\n{:#?}", self);
                         return false;
                     }
                 };
@@ -75,10 +75,11 @@ fn impl_database_modifier(
             }
 
             fn update(&mut self, conn: &::naphtha::DatabaseConnection<MysqlConnection>) -> bool {
+                use ::naphtha::{diesel::SaveChangesDsl, log};
                 let c = match conn.lock() {
                     Ok(c) => c,
                     Err(msg) => {
-                        ::log::error!("Could not aquire lock on DatabaseModifier::update for model:\n{:#?}", self);
+                        log::error!("Could not aquire lock on DatabaseModifier::update for model:\n{:#?}", self);
                         return false;
                     }
                 };
@@ -86,7 +87,7 @@ fn impl_database_modifier(
                 let update_result = match self.save_changes::<Self>(&*c) {
                     Ok(_) => true,
                     Err(msg) => {
-                        ::log::error!("Failed updating entity:\n{:#?}", self);
+                        log::error!("Failed updating entity:\n{:#?}", self);
                         return false;
                     },
                 };
@@ -96,19 +97,18 @@ fn impl_database_modifier(
 
             fn remove(&mut self, conn: &::naphtha::DatabaseConnection<MysqlConnection>) -> bool {
                 use {
-                    ::log::info,
-                    ::naphtha::DatabaseModel,
+                    ::naphtha::{log::{self, info}, DatabaseModel, diesel::{ExpressionMethods, RunQueryDsl, QueryDsl, Table}},
                     schema::{#table_name, #table_name::dsl::*},
                 };
                 let c = match conn.lock() {
                     Ok(c) => c,
                     Err(msg) => {
-                        ::log::error!("Could not aquire lock on DatabaseModifier::remove for model:\n{:#?}", self);
+                        log::error!("Could not aquire lock on DatabaseModifier::remove for model:\n{:#?}", self);
                         return false;
                     }
                 };
                 self.pre_remove(conn);
-                let num_deleted = ::diesel::delete(
+                let num_deleted = ::naphtha::diesel::delete(
                     #table_name.filter(
                         #table_name.primary_key().eq(self.primary_key())
                     )
@@ -120,7 +120,7 @@ fn impl_database_modifier(
                         true
                     },
                     Err(msg) => {
-                        ::log::error!("Could not aquire lock on DatabaseModifier::remove for model:\n{:#?}", self);
+                        log::error!("Could not aquire lock on DatabaseModifier::remove for model:\n{:#?}", self);
                         false
                     }
                 };
@@ -186,9 +186,10 @@ pub fn impl_query_by_property(
         let fieldtype = &field.ty;
         let query = quote! {
                 fn #function_name(conn: &::naphtha::DatabaseConnection<MysqlConnection>, property: &#fieldtype)
-                    -> ::diesel::result::QueryResult<#return_type> {
+                    -> ::naphtha::diesel::result::QueryResult<#return_type> {
                     use schema::{#table_name, #table_name::dsl::*};
-                    conn.custom::<::diesel::result::QueryResult<#return_type>, _>(|c| {
+                    use ::naphtha::diesel::{ExpressionMethods, QueryDsl, RunQueryDsl};
+                    conn.custom::<::naphtha::diesel::result::QueryResult<#return_type>, _>(|c| {
                         #table_name.filter(#fieldname.eq(property))
                             .#diesel_query_fn::<Self>(&*c)
                     })
@@ -208,7 +209,7 @@ pub fn impl_query_by_property(
 
     quote! {
         impl QueryByProperties<MysqlConnection> for #name {
-            type Error = ::diesel::result::Error;
+            type Error = ::naphtha::diesel::result::Error;
             #queries
             #query_by_ids
         }
@@ -240,11 +241,12 @@ fn impl_query_by_ids(
         let fieldtype = &field.ty;
         query = quote! {
                 fn query_by_ids(conn: &::naphtha::DatabaseConnection<MysqlConnection>, ids: &[#fieldtype])
-                    -> ::diesel::result::QueryResult<Vec<Self>> {
+                    -> ::naphtha::diesel::result::QueryResult<Vec<Self>> {
                     use {
                         schema::{#table_name, #table_name::dsl::*},
+                        ::naphtha::diesel::{ExpressionMethods, QueryDsl, RunQueryDsl},
                     };
-                    conn.custom::<::diesel::result::QueryResult<Vec<Self>>, _>(|c| {
+                    conn.custom::<::naphtha::diesel::result::QueryResult<Vec<Self>>, _>(|c| {
                         #table_name.filter(#fieldname.eq_any(ids)).load::<Self>(&*c)
                     })
                 }

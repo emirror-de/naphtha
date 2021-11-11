@@ -151,6 +151,9 @@
 //! }
 //! ```
 
+pub use diesel;
+pub extern crate log;
+
 use std::sync::{Arc, Mutex, MutexGuard, PoisonError};
 
 /// Defines your `struct` as a model and implements the required traits for

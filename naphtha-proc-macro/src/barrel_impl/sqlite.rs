@@ -8,11 +8,9 @@ pub(crate) fn impl_sqlite(ast: &DeriveInput) -> ::proc_macro2::TokenStream {
         where
             Self: ::naphtha::barrel::DatabaseSqlMigration,
         {
-            fn execute_migration_up(conn: &::naphtha::DatabaseConnection<::diesel::SqliteConnection>) -> Result<usize, String> {
+            fn execute_migration_up(conn: &::naphtha::DatabaseConnection<::naphtha::diesel::SqliteConnection>) -> Result<usize, String> {
                 use {
-                    ::log::error,
-                    ::naphtha::{barrel::Migration, DatabaseConnection},
-                    crate::diesel::RunQueryDsl,
+                    ::naphtha::{barrel::Migration, DatabaseConnection, log::error, diesel::RunQueryDsl},
                 };
                 let mut m = Migration::new();
                 Self::migration_up(&mut m);
@@ -26,17 +24,15 @@ pub(crate) fn impl_sqlite(ast: &DeriveInput) -> ::proc_macro2::TokenStream {
                     }
                 };
 
-                match ::diesel::sql_query(m).execute(&*c) {
+                match ::naphtha::diesel::sql_query(m).execute(&*c) {
                     Ok(u) => Ok(u),
                     Err(msg) => Err(msg.to_string()),
                 }
             }
 
-            fn execute_migration_down(conn: &::naphtha::DatabaseConnection<::diesel::SqliteConnection>) -> Result<usize, String> {
+            fn execute_migration_down(conn: &::naphtha::DatabaseConnection<::naphtha::diesel::SqliteConnection>) -> Result<usize, String> {
                 use {
-                    ::log::error,
-                    ::naphtha::{barrel::Migration, DatabaseConnection},
-                    crate::diesel::RunQueryDsl,
+                    ::naphtha::{barrel::Migration, DatabaseConnection, diesel::RunQueryDsl, log::error},
                 };
                 let mut m = Migration::new();
                 Self::migration_down(&mut m);
@@ -50,7 +46,7 @@ pub(crate) fn impl_sqlite(ast: &DeriveInput) -> ::proc_macro2::TokenStream {
                     }
                 };
 
-                match ::diesel::sql_query(m).execute(&*c) {
+                match ::naphtha::diesel::sql_query(m).execute(&*c) {
                     Ok(u) => Ok(u),
                     Err(msg) => Err(msg.to_string()),
                 }

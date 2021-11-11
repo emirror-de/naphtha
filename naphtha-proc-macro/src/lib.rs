@@ -54,13 +54,19 @@ pub fn model(
     let impl_barrel_mysql = barrel_impl::mysql::impl_mysql(&ast);
 
     let output = quote! {
-        use schema::*;
+        use self::schema::*;
         #[cfg(any(feature = "sqlite", feature = "mysql"))]
         use {
-            ::diesel::{backend::Backend, prelude::*},
+            ::naphtha::diesel::{backend::Backend, prelude::*},
         };
 
-        #[derive(Debug, Queryable, Identifiable, AsChangeset, Associations)]
+        #[derive(
+            Debug,
+            Queryable,
+            Identifiable,
+            AsChangeset,
+            Associations
+            )]
         #attr
         #ast
 
