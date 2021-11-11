@@ -1,8 +1,10 @@
-use quote::quote;
+use {quote::quote, syn::DeriveInput};
 
-pub(crate) fn impl_sqlite() -> ::proc_macro2::TokenStream {
+pub(crate) fn impl_sqlite(ast: &DeriveInput) -> ::proc_macro2::TokenStream {
+    let name = &ast.ident;
+
     quote! {
-        impl ::naphtha::barrel::DatabaseSqlMigrationExecutor<::diesel::SqliteConnection, usize> for Person
+        impl ::naphtha::barrel::DatabaseSqlMigrationExecutor<::naphtha::diesel::SqliteConnection, usize> for #name
         where
             Self: ::naphtha::barrel::DatabaseSqlMigration,
         {

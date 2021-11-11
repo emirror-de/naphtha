@@ -40,7 +40,7 @@ pub fn model(
     #[cfg(not(feature = "barrel-sqlite"))]
     let impl_barrel_sqlite = quote! {};
     #[cfg(feature = "barrel-sqlite")]
-    let impl_barrel_sqlite = barrel_impl::sqlite::impl_sqlite();
+    let impl_barrel_sqlite = barrel_impl::sqlite::impl_sqlite(&ast);
 
     // MYSQL
     #[cfg(not(feature = "mysql"))]
@@ -51,7 +51,7 @@ pub fn model(
     #[cfg(not(feature = "barrel-mysql"))]
     let impl_barrel_mysql = quote! {};
     #[cfg(feature = "barrel-mysql")]
-    let impl_barrel_mysql = barrel_impl::mysql::impl_mysql();
+    let impl_barrel_mysql = barrel_impl::mysql::impl_mysql(&ast);
 
     let output = quote! {
         use schema::*;
