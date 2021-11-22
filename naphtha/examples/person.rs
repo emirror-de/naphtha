@@ -1,29 +1,33 @@
 // You can run this example on different databases (Docker files provided in
 // the repository root).
 // Select the database by compiling this example with the corresponding feature:
-// * sqlite
-// * mysql
+// * sqlite and barrel-sqlite
+// * mysql and barrel-mysql
 // Also make sure that the correct type DbBackend is uncommented, see below.
+// Default is SqliteConnection.
 
 #[macro_use]
 extern crate diesel;
 
-use chrono::prelude::NaiveDateTime;
-use naphtha::{
-    barrel::{
-        types,
-        DatabaseSqlMigration,
-        DatabaseSqlMigrationExecutor,
-        Migration,
+use {
+    chrono::prelude::NaiveDateTime,
+    naphtha::{
+        barrel::{
+            types,
+            DatabaseSqlMigration,
+            DatabaseSqlMigrationExecutor,
+            Migration,
+        },
+        diesel::prelude::*,
+        model,
+        DatabaseConnect,
+        DatabaseConnection,
+        DatabaseInsertHandler,
+        DatabaseModel,
+        DatabaseModelModifier,
+        DatabaseRemoveHandler,
+        DatabaseUpdateHandler,
     },
-    model,
-    DatabaseConnect,
-    DatabaseConnection,
-    DatabaseInsertHandler,
-    DatabaseModel,
-    DatabaseModelModifier,
-    DatabaseRemoveHandler,
-    DatabaseUpdateHandler,
 };
 
 const DATABASE_URL: &'static str = if cfg!(feature = "sqlite") {
@@ -34,9 +38,9 @@ const DATABASE_URL: &'static str = if cfg!(feature = "sqlite") {
     "not supported"
 };
 
-//
-//type DbBackend = diesel::SqliteConnection;
-type DbBackend = diesel::MysqlConnection;
+// UNCOMMENT THE BACKEND THAT YOU WANT TO USE
+type DbBackend = diesel::SqliteConnection;
+//type DbBackend = diesel::MysqlConnection;
 
 // The model attribute automatically adds:
 //
