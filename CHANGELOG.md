@@ -1,5 +1,21 @@
 # Changelog
 
+## v0.4.1
+
+### New features
+
+* None
+
+### Changes
+
+* Updated `barrel` dependency to `0.7.0`
+* Bugfix, the `barrel` implementation was specifically implemented for the example
+* Removed the requirement of `log` crate as dependency when using this library
+
+### Removals and deprecations
+
+None
+
 ## v0.4.0
 
 ### New features
