@@ -28,6 +28,7 @@ If you have questions, want to contribute or have any other type of request, you
 - [x] Integrate `barrel` crate for writing migrations in Rust, available at runtime
 - [x] Implement support for `diesel::MySqlConnection`
 - [ ] Implement support for `diesel::PgConnection`
+- [ ] Connection pooling
 - [ ] More databases!!!
 
 ## Contributing
