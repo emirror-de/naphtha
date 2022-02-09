@@ -6,7 +6,11 @@ use {
     syn::{parse, DeriveInput},
 };
 
-#[cfg(any(feature = "barrel-sqlite", feature = "barrel-mysql"))]
+#[cfg(any(
+    feature = "barrel-sqlite",
+    feature = "barrel-mysql",
+    feature = "barrel-pg"
+))]
 mod barrel_impl;
 mod database_impl;
 mod database_traits;
@@ -25,9 +29,9 @@ pub fn model(
     let attr: ::proc_macro2::TokenStream = attr.parse().unwrap();
 
     // QUERY BY PROPERTY TRAIT
-    #[cfg(not(any(feature = "sqlite", feature = "mysql")))]
+    #[cfg(not(any(feature = "sqlite", feature = "mysql", feature = "pg")))]
     let impl_trait_query_by_properties = quote! {};
-    #[cfg(any(feature = "sqlite", feature = "mysql"))]
+    #[cfg(any(feature = "sqlite", feature = "mysql", feature = "pg"))]
     let impl_trait_query_by_properties =
         database_traits::impl_trait_query_by_properties(&ast);
 
@@ -53,9 +57,19 @@ pub fn model(
     #[cfg(feature = "barrel-mysql")]
     let impl_barrel_mysql = barrel_impl::mysql::impl_mysql(&ast);
 
+    // PostgreSQL
+    #[cfg(not(feature = "pg"))]
+    let impl_pg = quote! {};
+    #[cfg(feature = "pg")]
+    let impl_pg = database_impl::pg::impl_pg(&ast, &attr);
+    #[cfg(not(feature = "barrel-pg"))]
+    let impl_barrel_pg = quote! {};
+    #[cfg(feature = "barrel-pg")]
+    let impl_barrel_pg = barrel_impl::pg::impl_pg(&ast);
+
     let output = quote! {
         use self::schema::*;
-        #[cfg(any(feature = "sqlite", feature = "mysql"))]
+        #[cfg(any(feature = "sqlite", feature = "mysql", feature = "pg"))]
         use {
             ::naphtha::diesel::{backend::Backend, prelude::*},
         };
@@ -77,6 +91,9 @@ pub fn model(
 
         #impl_mysql
         #impl_barrel_mysql
+
+        #impl_pg
+        #impl_barrel_pg
     };
 
     ::proc_macro::TokenStream::from(output)

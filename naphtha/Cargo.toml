@@ -2,7 +2,7 @@
 name = "naphtha"
 version = "0.4.1"
 authors = ["Lewin Probst <info@emirror.de>"]
-edition = "2018"
+edition = "2021"
 license = "MIT OR Apache-2.0"
 description = "Universal database connection layer for your application."
 homepage = "https://github.com/emirror-de/naphtha"
@@ -17,13 +17,15 @@ default = []
 full = ["sqlite", "mysql", "barrel-full"]
 sqlite = ["naphtha-proc-macro/sqlite", "diesel/sqlite"]
 mysql = ["naphtha-proc-macro/mysql", "diesel/mysql"]
+pg = ["naphtha-proc-macro/pg", "diesel/postgres"]
 barrel-full = ["barrel-sqlite"]
 barrel-sqlite = ["barrel_dep/sqlite3", "naphtha-proc-macro/barrel-sqlite"]
 barrel-mysql = ["barrel_dep/mysql", "naphtha-proc-macro/barrel-mysql"]
+barrel-pg = ["barrel_dep/pg", "naphtha-proc-macro/barrel-pg"]
 
 [dependencies]
-barrel_dep = { version = "^0.7.0", optional = true, package = "barrel" }
-chrono = { version = "^0.4.19" }
-diesel = { version = "^1.4.8", features = ["chrono"] }
-naphtha-proc-macro = { path = "../naphtha-proc-macro", version = "^0.4.1" }
-log = "^0.4.14"
+barrel_dep = { version = "0.7.0", optional = true, package = "barrel" }
+chrono = { version = "0.4.19" }
+diesel = { version = "1.4.8", features = ["chrono"] }
+naphtha-proc-macro = { path = "../naphtha-proc-macro", version = "0.4.1" }
+log = "0.4.14"

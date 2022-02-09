@@ -34,13 +34,19 @@ const DATABASE_URL: &'static str = if cfg!(feature = "sqlite") {
     ":memory:"
 } else if cfg!(feature = "mysql") {
     "mysql://naphtha:naphtha@127.0.0.1:3306/naphtha"
+} else if cfg!(feature = "pg") {
+    "postgres://naphtha:naphtha@127.0.0.1:5432/naphtha"
 } else {
     "not supported"
 };
 
 // UNCOMMENT THE BACKEND THAT YOU WANT TO USE
+#[cfg(feature = "sqlite")]
 type DbBackend = diesel::SqliteConnection;
-//type DbBackend = diesel::MysqlConnection;
+#[cfg(feature = "mysql")]
+type DbBackend = diesel::MysqlConnection;
+#[cfg(feature = "pg")]
+type DbBackend = diesel::PgConnection;
 
 // The model attribute automatically adds:
 //
@@ -155,7 +161,11 @@ impl<T> DatabaseRemoveHandler<T> for Person {}
 //    }
 //}
 
-#[cfg(any(feature = "barrel-sqlite", feature = "barrel-mysql",))]
+#[cfg(any(
+    feature = "barrel-sqlite",
+    feature = "barrel-mysql",
+    feature = "barrel-pg"
+))]
 impl DatabaseSqlMigration for Person {
     fn migration_up(migration: &mut Migration) {
         migration.create_table_if_not_exists(Self::table_name(), |t| {

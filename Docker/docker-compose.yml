@@ -8,3 +8,9 @@ services:
     ports:
       - 3306:3306
     command: ["mysqld", "--default-authentication-plugin=mysql_native_password"]
+  database-pg:
+    image: "postgres:latest"
+    env_file:
+      - database-pg.env
+    ports:
+      - 5432:5432
