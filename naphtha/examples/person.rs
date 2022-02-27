@@ -1,10 +1,10 @@
 // You can run this example on different databases (Docker files provided in
-// the repository root).
-// Select the database by compiling this example with the corresponding feature:
+// the repository).
+//
+// Select the database by compiling this example with the corresponding features:
 // * sqlite and barrel-sqlite
 // * mysql and barrel-mysql
-// Also make sure that the correct type DbBackend is uncommented, see below.
-// Default is SqliteConnection.
+// * pg and barrel-pg
 
 #[macro_use]
 extern crate diesel;
@@ -46,7 +46,7 @@ const DATABASE_URL: &'static str = if cfg!(feature = "sqlite") {
     "not supported"
 };
 
-// UNCOMMENT THE BACKEND THAT YOU WANT TO USE
+// USE THE ACCORDING FEATURE FOR DATABASE TYPE SELECTION
 #[cfg(feature = "sqlite")]
 type DbBackend = diesel::SqliteConnection;
 #[cfg(feature = "mysql")]
