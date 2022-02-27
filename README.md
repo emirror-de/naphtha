@@ -6,17 +6,25 @@ SPDX-License-Identifier: MIT OR Apache-2.0
 
 # naphtha
 
+*Universal database connection layer*
+
 [![License](https://img.shields.io/badge/license-MIT%2FApache--2.0-informational?style=flat-square)](COPYRIGHT.md)
 
 [![Crates.io](https://img.shields.io/crates/v/naphtha.svg)](https://crates.io/crates/naphtha) [![docs.rs](https://img.shields.io/docsrs/naphtha?style=flat-square)](https://docs.rs/naphtha) **naphtha**
 
 [![Crates.io](https://img.shields.io/crates/v/naphtha-proc-macro.svg)](https://crates.io/crates/naphtha-proc-macro) **naphtha-proc-macro**
 
-Please checkout the [documentation page](https://docs.rs/naphtha) for information and examples (also see examples folder in [naphtha](./naphtha/examples))
+Please checkout the [documentation page](https://docs.rs/naphtha) for more information (also see examples folder in [naphtha](./naphtha/examples))
 
 If you have questions, want to contribute or have any other type of request, your invited to create an issue or visit the [openprobst.dev](https://openprobst.dev) discord server.
 
 [![](https://img.shields.io/discord/855726181142495242?color=154683&label=discord&style=flat-square)](https://discord.gg/nx7YtsjEbT)
+
+## About
+
+This crate is to simplify the creation and usage of models that require a database connection. If applied correct, changing the database type is only a feature flag away.
+
+The models can also be compiled and used without database connection support for better usage on server and client side.
 
 ## Roadmap
 
@@ -27,9 +35,13 @@ If you have questions, want to contribute or have any other type of request, you
 - [x] Thread safe sharing of the database connection
 - [x] Integrate `barrel` crate for writing migrations in Rust, available at runtime
 - [x] Implement support for `diesel::MySqlConnection`
-- [ ] Implement support for `diesel::PgConnection`
-- [ ] Connection pooling
-- [ ] More databases!!!
+- [x] Implement support for `diesel::PgConnection`
+- [ ] Connection pooling?
+- [ ] More databases?
+
+## Troubleshooting
+
+It is very easy to get a whole bunch of `trait bound not satisfied` error messages when your model is not configured correctly. Make sure that your `schema` module and the containing `table!` definition is in line with your `model` definition and that it uses the correct types defined by [barrel](https://docs.rs/barrel).
 
 ## Contributing
 
