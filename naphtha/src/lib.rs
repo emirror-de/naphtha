@@ -21,13 +21,15 @@
 //! * Change database on specific model in your application without the need to
 //! change your code.
 //! * Possibility to query a model from the database by using one of its member.
-//! * Integrated [barrel] for writing your SQL migrations.
+//! * Integrated [barrel] for writing your SQL migrations and the possibility to apply them during
+//! runtime.
 //! * Thread safe handling of the database connection.
 //!
 //! ## Supported databases
 //!
 //! * SQlite3 (using [diesel](diesel) under the hood).
 //! * MySQL (using [diesel](diesel) under the hood).
+//! * PostgreSQL (using [diesel](diesel) under the hood).
 //!
 //! ## Examples
 //!
@@ -47,6 +49,7 @@
 //! ### Defining a model and use database connection
 //!
 //! To create a model and its database integration, the following code is required.
+//!
 //! *Note that this is an excerpt, see the `examples` folder in the repository for
 //! a full working example.*
 //!
@@ -55,7 +58,7 @@
 //! pub struct Person {
 //!     id: i32,
 //!     pub description: Option<String>,
-        pub updated_at: NaiveDateTime,
+//!     pub updated_at: NaiveDateTime,
 //! }
 //!
 //! pub mod schema {
@@ -63,7 +66,7 @@
 //!         persons (id) {
 //!             id -> Int4,
 //!             description -> Nullable<Varchar>,
-                updated_at -> Timestamp,
+//!             updated_at -> Timestamp,
 //!         }
 //!     }
 //! }
@@ -147,7 +150,7 @@ pub use naphtha_proc_macro::model;
     feature = "barrel-mysql",
     feature = "barrel-pg"
 ))]
-/// Re-exports the [barrel] crate including small additions required by naphtha.
+/// Re-exports the [barrel] crate including small trait additions required by naphtha.
 pub mod barrel;
 mod database_impl;
 mod tests;

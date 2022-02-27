@@ -1,6 +1,6 @@
 [package]
 name = "naphtha-proc-macro"
-version = "0.4.1"
+version = "0.5.0"
 authors = ["Lewin Probst <info@emirror.de>"]
 edition = "2021"
 license = "MIT OR Apache-2.0"
