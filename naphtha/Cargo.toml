@@ -1,6 +1,6 @@
 [package]
 name = "naphtha"
-version = "0.4.1"
+version = "0.5.0"
 authors = ["Lewin Probst <info@emirror.de>"]
 edition = "2021"
 license = "MIT OR Apache-2.0"
@@ -27,5 +27,5 @@ barrel-pg = ["barrel_dep/pg", "naphtha-proc-macro/barrel-pg"]
 barrel_dep = { version = "0.7.0", optional = true, package = "barrel" }
 chrono = { version = "0.4.19" }
 diesel = { version = "1.4.8", features = ["chrono"] }
-naphtha-proc-macro = { path = "../naphtha-proc-macro", version = "0.4.1" }
+naphtha-proc-macro = { path = "../naphtha-proc-macro", version = "0.5" }
 log = "0.4.14"
