@@ -15,18 +15,21 @@
 //!
 //! * Most common function implementations `insert`, `update`, `remove` for your
 //! models.
+//! * Custom transactions provided by the `custom` function
 //! * [DatabaseUpdateHandler](DatabaseUpdateHandler) enables you to change the models values before and
 //! after the `update` transaction to the database.
 //! * Change database on specific model in your application without the need to
 //! change your code.
-//! * Possibility to query a model from the database by using one of its member *(NOT FINISHED YET)*.
-//! * Integrated [barrel] for writing your SQL migrations.
+//! * Possibility to query a model from the database by using one of its member.
+//! * Integrated [barrel] for writing your SQL migrations and the possibility to apply them during
+//! runtime.
 //! * Thread safe handling of the database connection.
 //!
 //! ## Supported databases
 //!
 //! * SQlite3 (using [diesel](diesel) under the hood).
 //! * MySQL (using [diesel](diesel) under the hood).
+//! * PostgreSQL (using [diesel](diesel) under the hood).
 //!
 //! ## Examples
 //!
@@ -45,35 +48,17 @@
 //!
 //! ### Defining a model and use database connection
 //!
-//! ```rust
-//! #[macro_use]
-//! extern crate diesel;
-//! #[macro_use]
-//! extern crate naphtha;
+//! To create a model and its database integration, the following code is required.
 //!
-//! use {
-//!     naphtha::{
-//!         model,
-//!         DatabaseModel,
-//!         DatabaseModelModifier,
-//!         DatabaseInsertHandler,
-//!         DatabaseUpdateHandler,
-//!         DatabaseRemoveHandler
-//!     },
-//!     diesel::table
-//! };
-//! #[cfg(any(feature = "barrel-sqlite", feature = "barrel-mysql"))]
-//! use naphtha::barrel::{types, DatabaseSqlMigration, Migration};
+//! *Note that this is an excerpt, see the `examples` folder in the repository for
+//! a full working example.*
 //!
-//! // It is recommended to wrap the actual used database type in a crate-global
-//! // alias. If the database is changed later, this is the only line that needs
-//! // to be adjusted to the new database type.
-//! pub(crate) type DbBackend = diesel::SqliteConnection;
-//!
+//! ```ignore
 //! #[model(table_name = "persons")]
 //! pub struct Person {
 //!     id: i32,
 //!     pub description: Option<String>,
+//!     pub updated_at: NaiveDateTime,
 //! }
 //!
 //! pub mod schema {
@@ -81,6 +66,7 @@
 //!         persons (id) {
 //!             id -> Int4,
 //!             description -> Nullable<Varchar>,
+//!             updated_at -> Timestamp,
 //!         }
 //!     }
 //! }
@@ -104,16 +90,12 @@
 //!     }
 //! }
 //!
-//! // do not implement custom changes before and after the transactions
-//! // to the database.
+//! // Define your custom changes to the model before and after the transactions.
 //! impl<T> naphtha::DatabaseUpdateHandler<T> for Person {}
 //! impl<T> naphtha::DatabaseRemoveHandler<T> for Person {}
 //! impl<T> naphtha::DatabaseInsertHandler<T> for Person {}
 //!
-//! #[cfg(any(
-//!     feature = "barrel-full",
-//!     feature = "barrel-sqlite",
-//! ))]
+//! // This implements your database migration functions.
 //! impl DatabaseSqlMigration for Person {
 //!     fn migration_up(migration: &mut Migration) {
 //!         use naphtha::DatabaseModel;
@@ -133,6 +115,8 @@
 //! fn main() {
 //!     use naphtha::{DatabaseConnection, DatabaseConnect};
 //!     let db = DatabaseConnection::connect(":memory:").unwrap();
+//!     // p is to be mutable because the insert function updates the id member
+//!     // to the one given by the database.
 //!     let mut p = Person {
 //!         id: Person::default_primary_key(),
 //!         description: Some("The new person is registered".into()),
@@ -147,7 +131,7 @@
 //!     });
 //!
 //!     p.remove(&db);
-//!     // p not available anymore
+//!     // p not available anymore in the database
 //! }
 //! ```
 
@@ -161,8 +145,12 @@ use std::sync::{Arc, Mutex, MutexGuard, PoisonError};
 /// supported.
 pub use naphtha_proc_macro::model;
 
-#[cfg(any(feature = "barrel-sqlite", feature = "barrel-mysql",))]
-/// Re-exports the [barrel] crate including small additions required by naphtha.
+#[cfg(any(
+    feature = "barrel-sqlite",
+    feature = "barrel-mysql",
+    feature = "barrel-pg"
+))]
+/// Re-exports the [barrel] crate including small trait additions required by naphtha.
 pub mod barrel;
 mod database_impl;
 mod tests;

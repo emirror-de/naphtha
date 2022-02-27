@@ -1,23 +1,29 @@
 // You can run this example on different databases (Docker files provided in
-// the repository root).
-// Select the database by compiling this example with the corresponding feature:
+// the repository).
+//
+// Select the database by compiling this example with the corresponding features:
 // * sqlite and barrel-sqlite
 // * mysql and barrel-mysql
-// Also make sure that the correct type DbBackend is uncommented, see below.
-// Default is SqliteConnection.
+// * pg and barrel-pg
 
 #[macro_use]
 extern crate diesel;
 
+#[cfg(any(
+    feature = "barrel-sqlite",
+    feature = "barrel-mysql",
+    feature = "barrel-pg"
+))]
+use naphtha::barrel::{
+    types,
+    DatabaseSqlMigration,
+    DatabaseSqlMigrationExecutor,
+    Migration,
+};
+
 use {
     chrono::prelude::NaiveDateTime,
     naphtha::{
-        barrel::{
-            types,
-            DatabaseSqlMigration,
-            DatabaseSqlMigrationExecutor,
-            Migration,
-        },
         diesel::prelude::*,
         model,
         DatabaseConnect,
@@ -34,13 +40,19 @@ const DATABASE_URL: &'static str = if cfg!(feature = "sqlite") {
     ":memory:"
 } else if cfg!(feature = "mysql") {
     "mysql://naphtha:naphtha@127.0.0.1:3306/naphtha"
+} else if cfg!(feature = "pg") {
+    "postgres://naphtha:naphtha@127.0.0.1:5432/naphtha"
 } else {
     "not supported"
 };
 
-// UNCOMMENT THE BACKEND THAT YOU WANT TO USE
+// USE THE ACCORDING FEATURE FOR DATABASE TYPE SELECTION
+#[cfg(feature = "sqlite")]
 type DbBackend = diesel::SqliteConnection;
-//type DbBackend = diesel::MysqlConnection;
+#[cfg(feature = "mysql")]
+type DbBackend = diesel::MysqlConnection;
+#[cfg(feature = "pg")]
+type DbBackend = diesel::PgConnection;
 
 // The model attribute automatically adds:
 //
@@ -155,7 +167,11 @@ impl<T> DatabaseRemoveHandler<T> for Person {}
 //    }
 //}
 
-#[cfg(any(feature = "barrel-sqlite", feature = "barrel-mysql",))]
+#[cfg(any(
+    feature = "barrel-sqlite",
+    feature = "barrel-mysql",
+    feature = "barrel-pg"
+))]
 impl DatabaseSqlMigration for Person {
     fn migration_up(migration: &mut Migration) {
         migration.create_table_if_not_exists(Self::table_name(), |t| {
@@ -177,6 +193,11 @@ fn main() {
     // create the table if not existent
     // This method can be used on startup of your application to make sure
     // your database schema is always up to date.
+    #[cfg(any(
+        feature = "barrel-sqlite",
+        feature = "barrel-mysql",
+        feature = "barrel-pg"
+    ))]
     match Person::execute_migration_up(&db) {
         Ok(_) => (),
         Err(msg) => println!("Could not create table: {}", msg),
@@ -204,6 +225,11 @@ fn main() {
     p.remove(&db);
     // p not available anymore
 
+    #[cfg(any(
+        feature = "barrel-sqlite",
+        feature = "barrel-mysql",
+        feature = "barrel-pg"
+    ))]
     match Person::execute_migration_down(&db) {
         Ok(_) => (),
         Err(msg) => println!("Could not drop table: {}", msg),

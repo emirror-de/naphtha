@@ -1,8 +1,8 @@
 [package]
 name = "naphtha-proc-macro"
-version = "0.4.1"
+version = "0.5.0"
 authors = ["Lewin Probst <info@emirror.de>"]
-edition = "2018"
+edition = "2021"
 license = "MIT OR Apache-2.0"
 description = "Supporting macro crate for naphtha"
 homepage = "https://github.com/emirror-de/naphtha"
@@ -17,14 +17,16 @@ proc-macro = true
 
 [features]
 default = []
-full = ["sqlite", "mysql", "barrel-full"]
-barrel-full = ["barrel-sqlite", "barrel-mysql"]
+full = ["sqlite", "mysql", "pg", "barrel-full"]
+barrel-full = ["barrel-sqlite", "barrel-mysql", "barrel-pg"]
 sqlite = []
 mysql = []
+pg = []
 barrel-sqlite = []
 barrel-mysql = []
+barrel-pg = []
 
 [dependencies]
-syn = { version = "^1.0.74", features = ["parsing"] }
-proc-macro2 = "^1.0.28"
-quote = "^1.0.9"
+syn = { version = "1.0.86", features = ["parsing"] }
+proc-macro2 = "1.0.36"
+quote = "1.0.15"
