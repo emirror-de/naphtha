@@ -9,15 +9,21 @@
 #[macro_use]
 extern crate diesel;
 
+#[cfg(any(
+    feature = "barrel-sqlite",
+    feature = "barrel-mysql",
+    feature = "barrel-pg"
+))]
+use naphtha::barrel::{
+    types,
+    DatabaseSqlMigration,
+    DatabaseSqlMigrationExecutor,
+    Migration,
+};
+
 use {
     chrono::prelude::NaiveDateTime,
     naphtha::{
-        barrel::{
-            types,
-            DatabaseSqlMigration,
-            DatabaseSqlMigrationExecutor,
-            Migration,
-        },
         diesel::prelude::*,
         model,
         DatabaseConnect,
@@ -187,6 +193,11 @@ fn main() {
     // create the table if not existent
     // This method can be used on startup of your application to make sure
     // your database schema is always up to date.
+    #[cfg(any(
+        feature = "barrel-sqlite",
+        feature = "barrel-mysql",
+        feature = "barrel-pg"
+    ))]
     match Person::execute_migration_up(&db) {
         Ok(_) => (),
         Err(msg) => println!("Could not create table: {}", msg),
@@ -214,6 +225,11 @@ fn main() {
     p.remove(&db);
     // p not available anymore
 
+    #[cfg(any(
+        feature = "barrel-sqlite",
+        feature = "barrel-mysql",
+        feature = "barrel-pg"
+    ))]
     match Person::execute_migration_down(&db) {
         Ok(_) => (),
         Err(msg) => println!("Could not drop table: {}", msg),
