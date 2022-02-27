@@ -1,3 +1,5 @@
+//! This crate is a support crate that contains the necessary macros for naphtha to compile.
+
 extern crate proc_macro;
 extern crate quote;
 
