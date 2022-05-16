@@ -16,9 +16,6 @@ SPDX-License-Identifier: MIT OR Apache-2.0
 
 Please checkout the [documentation page](https://docs.rs/naphtha) for more information (also see examples folder in [naphtha](./naphtha/examples))
 
-If you have questions, want to contribute or have any other type of request, your invited to create an issue or visit the [openprobst.dev](https://openprobst.dev) discord server.
-
-[![](https://img.shields.io/discord/855726181142495242?color=154683&label=discord&style=flat-square)](https://discord.gg/nx7YtsjEbT)
 
 ## About
 
