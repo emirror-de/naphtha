@@ -31,13 +31,13 @@ fn impl_database_modifier(
         );
 
     quote! {
-        impl ::naphtha::DatabaseModelModifier<PgConnection> for #name
+        impl ::naphtha::DatabaseModelModifier<::naphtha::diesel::PgConnection> for #name
         where
-            Self: ::naphtha::DatabaseUpdateHandler<PgConnection>
-            + ::naphtha::DatabaseInsertHandler<PgConnection>
-            + ::naphtha::DatabaseRemoveHandler<PgConnection>,
+            Self: ::naphtha::DatabaseUpdateHandler<::naphtha::diesel::PgConnection>
+            + ::naphtha::DatabaseInsertHandler<::naphtha::diesel::PgConnection>
+            + ::naphtha::DatabaseRemoveHandler<::naphtha::diesel::PgConnection>,
         {
-            fn insert(&mut self, conn: &::naphtha::DatabaseConnection<PgConnection>) -> bool {
+            fn insert(&mut self, conn: &::naphtha::DatabaseConnection<::naphtha::diesel::PgConnection>) -> bool {
                 use {
                     ::naphtha::{log, DatabaseModel, diesel::{Connection, RunQueryDsl, ExpressionMethods, Table, QueryDsl}},
                     schema::{#table_name, #table_name::dsl::*},
@@ -74,7 +74,7 @@ fn impl_database_modifier(
                 true
             }
 
-            fn update(&mut self, conn: &::naphtha::DatabaseConnection<PgConnection>) -> bool {
+            fn update(&mut self, conn: &::naphtha::DatabaseConnection<::naphtha::diesel::PgConnection>) -> bool {
                 use ::naphtha::{diesel::SaveChangesDsl, log};
                 let c = match conn.lock() {
                     Ok(c) => c,
@@ -95,7 +95,7 @@ fn impl_database_modifier(
                 update_result
             }
 
-            fn remove(&mut self, conn: &::naphtha::DatabaseConnection<PgConnection>) -> bool {
+            fn remove(&mut self, conn: &::naphtha::DatabaseConnection<::naphtha::diesel::PgConnection>) -> bool {
                 use {
                     ::naphtha::{log::{self, info}, DatabaseModel, diesel::{ExpressionMethods, RunQueryDsl, QueryDsl, Table}},
                     schema::{#table_name, #table_name::dsl::*},
@@ -185,7 +185,7 @@ pub fn impl_query_by_property(
         );
         let fieldtype = &field.ty;
         let query = quote! {
-                fn #function_name(conn: &::naphtha::DatabaseConnection<PgConnection>, property: &#fieldtype)
+                fn #function_name(conn: &::naphtha::DatabaseConnection<::naphtha::diesel::PgConnection>, property: &#fieldtype)
                     -> ::naphtha::diesel::result::QueryResult<#return_type> {
                     use schema::{#table_name, #table_name::dsl::*};
                     use ::naphtha::diesel::{ExpressionMethods, QueryDsl, RunQueryDsl};
@@ -208,7 +208,7 @@ pub fn impl_query_by_property(
     };
 
     quote! {
-        impl QueryByProperties<PgConnection> for #name {
+        impl QueryByProperties<::naphtha::diesel::PgConnection> for #name {
             type Error = ::naphtha::diesel::result::Error;
             #queries
             #query_by_ids
@@ -240,7 +240,7 @@ fn impl_query_by_ids(
         };
         let fieldtype = &field.ty;
         query = quote! {
-                fn query_by_ids(conn: &::naphtha::DatabaseConnection<PgConnection>, ids: &[#fieldtype])
+                fn query_by_ids(conn: &::naphtha::DatabaseConnection<::naphtha::diesel::PgConnection>, ids: &[#fieldtype])
                     -> ::naphtha::diesel::result::QueryResult<Vec<Self>> {
                     use {
                         schema::{#table_name, #table_name::dsl::*},
