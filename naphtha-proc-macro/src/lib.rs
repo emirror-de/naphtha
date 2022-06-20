@@ -60,7 +60,7 @@ pub fn model(
     #[cfg(not(feature = "mysql"))]
     let impl_mysql = quote! {};
     #[cfg(feature = "mysql")]
-    let impl_mysql = database_impl::mysql::impl_mysql(&ast, &attr);
+    let impl_mysql = database_impl::mysql::impl_mysql(&ast, &params);
 
     #[cfg(not(feature = "barrel-mysql"))]
     let impl_barrel_mysql = quote! {};
