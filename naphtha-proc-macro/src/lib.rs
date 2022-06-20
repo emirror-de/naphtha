@@ -17,7 +17,7 @@ mod barrel_impl;
 mod database_impl;
 mod database_traits;
 #[allow(dead_code)]
-mod helper;
+mod params;
 
 #[proc_macro_attribute]
 pub fn model(
@@ -27,21 +27,29 @@ pub fn model(
     let ast: DeriveInput = parse(item).expect(
         "proc_macro_attribute model: Could not parse TokenStream input!",
     );
-    let attr = format!("#[{}]", attr);
-    let attr: ::proc_macro2::TokenStream = attr.parse().unwrap();
+
+    let params = params::Params::from(attr.clone());
+    let attribute_table_name =
+        format!("#[table_name = \"{}\"]", params.table_name);
+    let attribute_table_name: ::proc_macro2::TokenStream =
+        attribute_table_name.parse().unwrap();
+    let attribute_primary_key =
+        format!("#[primary_key({})]", params.primary_key);
+    let attribute_primary_key: ::proc_macro2::TokenStream =
+        attribute_primary_key.parse().unwrap();
 
     // QUERY BY PROPERTY TRAIT
     #[cfg(not(any(feature = "sqlite", feature = "mysql", feature = "pg")))]
     let impl_trait_query_by_properties = quote! {};
     #[cfg(any(feature = "sqlite", feature = "mysql", feature = "pg"))]
     let impl_trait_query_by_properties =
-        database_traits::impl_trait_query_by_properties(&ast);
+        database_traits::impl_trait_query_by_properties(&ast, &params);
 
     // SQLITE
     #[cfg(not(feature = "sqlite"))]
     let impl_sqlite = quote! {};
     #[cfg(feature = "sqlite")]
-    let impl_sqlite = database_impl::sqlite::impl_sqlite(&ast, &attr);
+    let impl_sqlite = database_impl::sqlite::impl_sqlite(&ast, &params);
 
     #[cfg(not(feature = "barrel-sqlite"))]
     let impl_barrel_sqlite = quote! {};
@@ -83,7 +91,8 @@ pub fn model(
             AsChangeset,
             Associations
             )]
-        #attr
+        #attribute_table_name
+        #attribute_primary_key
         #ast
 
         #impl_trait_query_by_properties

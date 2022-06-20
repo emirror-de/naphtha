@@ -2,6 +2,7 @@ use quote::quote;
 
 pub fn impl_trait_query_by_properties(
     ast: &::syn::DeriveInput,
+    params: &crate::params::Params,
 ) -> ::proc_macro2::TokenStream {
     let data = match &ast.data {
         ::syn::Data::Struct(data) => data,
@@ -10,6 +11,7 @@ pub fn impl_trait_query_by_properties(
             return quote! {};
         }
     };
+
     let mut queries = quote! {};
     for field in data.fields.iter() {
         if field.ident.is_none() {
@@ -18,9 +20,14 @@ pub fn impl_trait_query_by_properties(
         let fieldname = field.ident.as_ref().unwrap();
         let return_type = match &fieldname.to_string()[..] {
             "updated_at" => continue,
-            "id" => quote! { Self },
             _ => quote! { Vec<Self> },
         };
+        let return_type = if &fieldname.to_string()[..] == params.primary_key {
+            quote! { Self }
+        } else {
+            return_type
+        };
+
         let function_name = ::proc_macro2::Ident::new(
             &format!("query_by_{}", fieldname).to_lowercase(),
             ::proc_macro2::Span::call_site(),
@@ -38,11 +45,7 @@ pub fn impl_trait_query_by_properties(
         };
     }
 
-    let query_by_ids = if crate::helper::has_id(ast) {
-        impl_trait_query_by_ids(ast)
-    } else {
-        quote! {}
-    };
+    let query_by_primary_keys = impl_trait_query_by_primary_keys(ast, params);
 
     quote! {
         /// Queries the model by the given property. Returns only those with an
@@ -53,13 +56,14 @@ pub fn impl_trait_query_by_properties(
         {
             type Error;
             #queries
-            #query_by_ids
+            #query_by_primary_keys
         }
     }
 }
 
-fn impl_trait_query_by_ids(
+fn impl_trait_query_by_primary_keys(
     ast: &::syn::DeriveInput,
+    params: &crate::params::Params,
 ) -> ::proc_macro2::TokenStream {
     let data = match &ast.data {
         ::syn::Data::Struct(data) => data,
@@ -68,19 +72,23 @@ fn impl_trait_query_by_ids(
             return quote! {};
         }
     };
+
     let mut query = quote! {};
     for field in data.fields.iter() {
         if field.ident.is_none() {
             continue;
         }
         let fieldname = field.ident.as_ref().unwrap();
-        match &fieldname.to_string()[..] {
-            "id" => (),
-            _ => continue,
-        };
+        if &fieldname.to_string()[..] != params.primary_key {
+            continue;
+        }
         let fieldtype = &field.ty;
+        let function_name = ::proc_macro2::Ident::new(
+            &format!("query_by_{}s", &params.primary_key.to_lowercase()),
+            ::proc_macro2::Span::call_site(),
+        );
         query = quote! {
-                fn query_by_ids(conn: &::naphtha::DatabaseConnection<DB>, ids: &[#fieldtype])
+                fn #function_name(conn: &::naphtha::DatabaseConnection<DB>, primary_keys: &[#fieldtype])
                     -> Result<Vec<Self>, Self::Error>;
         };
         break;
