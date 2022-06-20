@@ -5,10 +5,10 @@ use {
 
 pub(crate) fn impl_pg(
     ast: &DeriveInput,
-    attr: &::proc_macro2::TokenStream,
+    params: &crate::params::Params,
 ) -> ::proc_macro2::TokenStream {
-    let database_modifier = impl_database_modifier(ast, attr);
-    let query_by_property = impl_query_by_property(ast, attr);
+    let database_modifier = impl_database_modifier(ast, &params);
+    let query_by_property = impl_query_by_property(ast, &params);
     quote! {
         #database_modifier
         #query_by_property
@@ -17,19 +17,16 @@ pub(crate) fn impl_pg(
 
 fn impl_database_modifier(
     ast: &DeriveInput,
-    table_name: &::proc_macro2::TokenStream,
+    params: &crate::params::Params,
 ) -> ::proc_macro2::TokenStream {
     let name = &ast.ident;
-    let table_name = crate::helper::extract_table_name(table_name);
-    //let table_name: syn::UsePath = syn::parse_quote! {#name::table_name()};
 
-    let insert_properties = generate_insert_properties(ast);
-    assert!(
-        crate::helper::has_id(ast),
-        "No `id` member found in model `{}`. Currently only models having an `id` column of type `i32` are supported.",
-        name
-        );
+    let insert_properties = generate_insert_properties(ast, params);
 
+    let table_name = ::proc_macro2::Ident::new(
+        &params.table_name,
+        ::proc_macro2::Span::call_site(),
+    );
     quote! {
         impl ::naphtha::DatabaseModelModifier<::naphtha::diesel::PgConnection> for #name
         where
@@ -131,7 +128,10 @@ fn impl_database_modifier(
     }
 }
 
-fn generate_insert_properties(ast: &DeriveInput) -> ::proc_macro2::TokenStream {
+fn generate_insert_properties(
+    ast: &DeriveInput,
+    params: &crate::params::Params,
+) -> ::proc_macro2::TokenStream {
     let data = match &ast.data {
         Struct(data) => data,
         _ => panic!("Other data formats than \"struct\" is not supported yet!"),
@@ -142,9 +142,8 @@ fn generate_insert_properties(ast: &DeriveInput) -> ::proc_macro2::TokenStream {
             continue;
         }
         let fieldname = field.ident.as_ref().unwrap();
-        if &fieldname.to_string()[..] == "id" {
-            // field id is currently used as primary key and therfore generated
-            // by the database, so it must not be set during insertion.
+        if fieldname.to_string() == params.primary_key {
+            // Primary must not be set during insertion.
             continue;
         }
         collected_properties = quote! {
@@ -157,10 +156,14 @@ fn generate_insert_properties(ast: &DeriveInput) -> ::proc_macro2::TokenStream {
 
 pub fn impl_query_by_property(
     ast: &::syn::DeriveInput,
-    table_name_attr: &::proc_macro2::TokenStream,
+    params: &crate::params::Params,
 ) -> ::proc_macro2::TokenStream {
     let name = &ast.ident;
-    let table_name = crate::helper::extract_table_name(table_name_attr);
+    let table_name = ::proc_macro2::Ident::new(
+        &params.table_name,
+        ::proc_macro2::Span::call_site(),
+    );
+
     let data = match &ast.data {
         ::syn::Data::Struct(data) => data,
         _ => {
@@ -176,9 +179,14 @@ pub fn impl_query_by_property(
         let fieldname = field.ident.as_ref().unwrap();
         let (return_type, diesel_query_fn) = match &fieldname.to_string()[..] {
             "updated_at" => continue,
-            "id" => (quote! { Self }, quote! { first }),
             _ => (quote! { Vec<Self> }, quote! { load }),
         };
+        let (return_type, diesel_query_fn) =
+            if fieldname.to_string() == params.primary_key {
+                (quote! { Self }, quote! { first })
+            } else {
+                (return_type, diesel_query_fn)
+            };
         let function_name = ::proc_macro2::Ident::new(
             &format!("query_by_{}", fieldname).to_lowercase(),
             ::proc_macro2::Span::call_site(),
@@ -201,26 +209,26 @@ pub fn impl_query_by_property(
         };
     }
 
-    let query_by_ids = if crate::helper::has_id(ast) {
-        impl_query_by_ids(ast, table_name_attr)
-    } else {
-        quote! {}
-    };
+    let query_by_primary_keys = impl_query_by_primary_keys(ast, params);
 
     quote! {
         impl QueryByProperties<::naphtha::diesel::PgConnection> for #name {
             type Error = ::naphtha::diesel::result::Error;
             #queries
-            #query_by_ids
+            #query_by_primary_keys
         }
     }
 }
 
-fn impl_query_by_ids(
+fn impl_query_by_primary_keys(
     ast: &::syn::DeriveInput,
-    table_name_attr: &::proc_macro2::TokenStream,
+    params: &crate::params::Params,
 ) -> ::proc_macro2::TokenStream {
-    let table_name = crate::helper::extract_table_name(table_name_attr);
+    let table_name = ::proc_macro2::Ident::new(
+        &params.table_name,
+        ::proc_macro2::Span::call_site(),
+    );
+
     let data = match &ast.data {
         ::syn::Data::Struct(data) => data,
         _ => {
@@ -234,20 +242,23 @@ fn impl_query_by_ids(
             continue;
         }
         let fieldname = field.ident.as_ref().unwrap();
-        match &fieldname.to_string()[..] {
-            "id" => (),
-            _ => continue,
-        };
+        if fieldname.to_string() != params.primary_key {
+            continue;
+        }
         let fieldtype = &field.ty;
+        let function_name = ::proc_macro2::Ident::new(
+            &format!("query_by_{}s", fieldname).to_lowercase(),
+            ::proc_macro2::Span::call_site(),
+        );
         query = quote! {
-                fn query_by_ids(conn: &::naphtha::DatabaseConnection<::naphtha::diesel::PgConnection>, ids: &[#fieldtype])
+                fn #function_name(conn: &::naphtha::DatabaseConnection<::naphtha::diesel::PgConnection>, primary_keys: &[#fieldtype])
                     -> ::naphtha::diesel::result::QueryResult<Vec<Self>> {
                     use {
                         schema::{#table_name, #table_name::dsl::*},
                         ::naphtha::diesel::{ExpressionMethods, QueryDsl, RunQueryDsl},
                     };
                     conn.custom::<::naphtha::diesel::result::QueryResult<Vec<Self>>, _>(|c| {
-                        #table_name.filter(#fieldname.eq_any(ids)).load::<Self>(&*c)
+                        #table_name.filter(#table_name.primary_key().eq_any(primary_keys)).load::<Self>(&*c)
                     })
                 }
         };

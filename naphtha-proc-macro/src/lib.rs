@@ -71,7 +71,7 @@ pub fn model(
     #[cfg(not(feature = "pg"))]
     let impl_pg = quote! {};
     #[cfg(feature = "pg")]
-    let impl_pg = database_impl::pg::impl_pg(&ast, &attr);
+    let impl_pg = database_impl::pg::impl_pg(&ast, &params);
     #[cfg(not(feature = "barrel-pg"))]
     let impl_barrel_pg = quote! {};
     #[cfg(feature = "barrel-pg")]
