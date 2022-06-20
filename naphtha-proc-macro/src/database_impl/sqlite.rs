@@ -23,19 +23,6 @@ fn impl_database_modifier(
 
     let insert_properties = generate_insert_properties(ast, params);
 
-    /*
-    let model_has_id_member = crate::helper::has_id(ast);
-                    if (#model_has_id_member) {
-                        #table_name.select(#table_name.primary_key())
-                            .order(#table_name.primary_key().desc())
-                            .first(&*c)
-                    } else {
-                        #table_name.select(#table_name.primary_key())
-                            .filter(#table_name.primary_key().eq(self.primary_key()))
-                            .first(&*c)
-                    }
-    */
-
     let table_name = ::proc_macro2::Ident::new(
         &params.table_name,
         ::proc_macro2::Span::call_site(),
@@ -156,8 +143,7 @@ fn generate_insert_properties(
         }
         let fieldname = field.ident.as_ref().unwrap();
         if fieldname.to_string() == params.primary_key {
-            // field id is currently used as primary key and therfore generated
-            // by the database, so it must not be set during insertion.
+            // Primary must not be set during insertion.
             continue;
         }
         collected_properties = quote! {
