@@ -255,7 +255,7 @@ fn impl_query_by_primary_keys(
                     -> ::naphtha::diesel::result::QueryResult<Vec<Self>> {
                     use {
                         schema::{#table_name, #table_name::dsl::*},
-                        ::naphtha::diesel::{ExpressionMethods, QueryDsl, RunQueryDsl},
+                        ::naphtha::diesel::{ExpressionMethods, QueryDsl, RunQueryDsl, Table},
                     };
                     conn.custom::<::naphtha::diesel::result::QueryResult<Vec<Self>>, _>(|c| {
                         #table_name.filter(#table_name.primary_key().eq_any(primary_keys)).load::<Self>(&*c)
