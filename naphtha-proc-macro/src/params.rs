@@ -20,8 +20,8 @@ enum ParseState {
 impl From<::proc_macro::TokenStream> for Params {
     fn from(attr: ::proc_macro::TokenStream) -> Self {
         use proc_macro::TokenTree::*;
-        let mut table_name = String::new();
-        let mut primary_key = String::new();
+        let mut table_name = None;
+        let mut primary_key = None;
 
         // The expected token
         let mut parse_state = ParseState::Identifier;
@@ -55,8 +55,8 @@ impl From<::proc_macro::TokenStream> for Params {
                     match current_ident {
                         Some(i) => {
                             match &i.to_string()[..] {
-                                Self::TABLE_NAME => table_name = literal.replace("\"", ""),
-                                Self::PRIMARY_KEY => primary_key = literal.replace("\"", ""),
+                                Self::TABLE_NAME => table_name = Some(literal.replace("\"", "")),
+                                Self::PRIMARY_KEY => primary_key = Some(literal.replace("\"", "")),
                                 _ => panic!("Unknown parameter '{}' given!", i.to_string()),
                             }
                         }
@@ -68,6 +68,18 @@ impl From<::proc_macro::TokenStream> for Params {
                 _ => continue,
             }
         }
+
+        let table_name = if let None = table_name {
+            panic!("Missing parameter table_name. Please add it to the model attribute, e.g. table_name = \"my_new_table\"!");
+        } else {
+            table_name.unwrap()
+        };
+
+        let primary_key = if let None = primary_key {
+            panic!("Missing parameter primary_key. Please add it to the model attribute, e.g. primary_key = \"id\"!");
+        } else {
+            primary_key.unwrap()
+        };
 
         Params {
             table_name,
