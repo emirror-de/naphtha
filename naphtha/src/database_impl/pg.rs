@@ -19,16 +19,8 @@ impl From<Arc<Mutex<PgConnection>>> for DatabaseConnection<PgConnection> {
 impl DatabaseConnect<PgConnection> for DatabaseConnection<PgConnection> {
     fn connect(
         database_url: &str,
-    ) -> Result<DatabaseConnection<PgConnection>, String> {
-        let connection = match Connection::establish(database_url) {
-            Ok(c) => c,
-            Err(msg) => {
-                return Err(format!(
-                "Connection to database \"{}\" could not be established: {}",
-                database_url, msg
-            ))
-            }
-        };
+    ) -> anyhow::Result<DatabaseConnection<PgConnection>> {
+        let connection = Connection::establish(database_url)?;
         Ok(DatabaseConnection(Arc::new(Mutex::new(connection))))
     }
 }

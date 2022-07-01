@@ -23,16 +23,8 @@ impl DatabaseConnect<SqliteConnection>
 {
     fn connect(
         database_url: &str,
-    ) -> Result<DatabaseConnection<SqliteConnection>, String> {
-        let connection = match Connection::establish(database_url) {
-            Ok(c) => c,
-            Err(msg) => {
-                return Err(format!(
-                "Connection to database \"{}\" could not be established: {}",
-                database_url, msg
-            ))
-            }
-        };
+    ) -> anyhow::Result<DatabaseConnection<SqliteConnection>> {
+        let connection = Connection::establish(database_url)?;
         Ok(DatabaseConnection(Arc::new(Mutex::new(connection))))
     }
 }

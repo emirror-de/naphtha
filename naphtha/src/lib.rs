@@ -136,6 +136,7 @@
 //! ```
 
 pub use diesel;
+pub extern crate anyhow;
 pub extern crate log;
 
 use std::sync::{Arc, Mutex, MutexGuard, PoisonError};
@@ -179,7 +180,7 @@ impl<T> DatabaseConnection<T> {
 /// Contains functions database connection handling.
 pub trait DatabaseConnect<T> {
     /// Establishes a new connection to the given database string.
-    fn connect(database_url: &str) -> Result<DatabaseConnection<T>, String>;
+    fn connect(database_url: &str) -> anyhow::Result<DatabaseConnection<T>>;
 }
 
 /// Defines the relation of the model to the database.
@@ -206,12 +207,12 @@ where
 {
     /// Inserts `self` to the given database.
     /// *Updates the `primary_key` to the one that has been assigned by the database*.
-    fn insert(&mut self, conn: &DatabaseConnection<T>) -> bool;
+    fn insert(&mut self, conn: &DatabaseConnection<T>) -> anyhow::Result<()>;
     /// Removes `self` from the database, selects by `id`.
-    fn remove(&mut self, conn: &DatabaseConnection<T>) -> bool;
+    fn remove(&mut self, conn: &DatabaseConnection<T>) -> ::anyhow::Result<()>;
     /// Updates `self` on the given database.
     /// *Updates the `updated_at` member if available before updating the database.*.
-    fn update(&mut self, conn: &DatabaseConnection<T>) -> bool;
+    fn update(&mut self, conn: &DatabaseConnection<T>) -> ::anyhow::Result<()>;
 }
 
 /// Methods that are called before and after the transaction executed when

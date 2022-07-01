@@ -1,10 +1,20 @@
 # Changelog
 
+## v0.6.0
+
+### New features
+
+* Added required `primary_key` parameter to the `#[model]` attribute. This enables the possibility of setting the primary key name.
+
+### Changes
+
+* Improved error handling. The `DatabaseModelModifier` now returns an `anyhow::Result` instead of a plain `bool`
+
 ## v0.5.0
 
 ### New features
 
-- `diesel::Pg` connection is now implemented
+* `diesel::Pg` connection is now implemented
 
 ### Changes
 

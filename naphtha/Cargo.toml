@@ -29,3 +29,4 @@ chrono = { version = "0.4.19" }
 diesel = { version = "1.4.8", features = ["chrono"] }
 naphtha-proc-macro = { path = "../naphtha-proc-macro", version = "0.6.0-dev" }
 log = "0.4.14"
+anyhow = "1"
