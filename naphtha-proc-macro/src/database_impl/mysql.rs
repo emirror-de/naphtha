@@ -226,6 +226,7 @@ pub fn impl_query_by_property(
         );
         let fieldtype = &field.ty;
         let query = quote! {
+                /// Queries the database by the given #fieldname.
                 fn #function_name(conn: &::naphtha::DatabaseConnection<::naphtha::diesel::MysqlConnection>, property: &#fieldtype)
                     -> ::naphtha::diesel::result::QueryResult<#return_type> {
                     use schema::{#table_name, #table_name::dsl::*};
@@ -246,6 +247,7 @@ pub fn impl_query_by_property(
 
     quote! {
         impl QueryByProperties<::naphtha::diesel::MysqlConnection> for #name {
+            /// The error type for this implementation.
             type Error = ::naphtha::diesel::result::Error;
             #queries
             #query_by_primary_keys
@@ -284,6 +286,7 @@ fn impl_query_by_primary_keys(
             ::proc_macro2::Span::call_site(),
         );
         query = quote! {
+                /// Queries the database for all given primary keys.
                 fn #function_name(conn: &::naphtha::DatabaseConnection<::naphtha::diesel::MysqlConnection>, primary_keys: &[#fieldtype])
                     -> ::naphtha::diesel::result::QueryResult<Vec<Self>> {
                     use {

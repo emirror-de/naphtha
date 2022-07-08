@@ -54,6 +54,7 @@ pub fn impl_trait_query_by_properties(
             where
                 Self: Sized
         {
+            /// The error type for this implementation.
             type Error;
             #queries
             #query_by_primary_keys
@@ -88,6 +89,7 @@ fn impl_trait_query_by_primary_keys(
             ::proc_macro2::Span::call_site(),
         );
         query = quote! {
+                /// Queries the database by the given #fieldname.
                 fn #function_name(conn: &::naphtha::DatabaseConnection<DB>, primary_keys: &[#fieldtype])
                     -> Result<Vec<Self>, Self::Error>;
         };
