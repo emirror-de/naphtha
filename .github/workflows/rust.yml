@@ -16,13 +16,15 @@ jobs:
 
     services:
       mysql:
-        image: mysql:latest
-        ports: ['3306:3306']
+        image: mysql:8
+        ports: 
+          - 3306:3306
         env:
           MYSQL_USER: naphtha
           MYSQL_PASSWORD: naphtha
+          MYSQL_ROOT_PASSWORD: root
           MYSQL_DATABASE: naphtha
-        options: --health-cmd "mysqladmin ping" --health-interval 5s --health-timeout 2s --health-retries 3
+        options: --health-cmd="mysqladmin ping" --health-interval=5s --health-timeout=2s --health-retries=3
 
       postgres:
         image: postgres:latest
