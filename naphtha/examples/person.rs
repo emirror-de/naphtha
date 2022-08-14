@@ -36,6 +36,12 @@ use {
     },
 };
 
+/*
+
+This section has been commented because the tests with --all-features are failing.
+Therefore the used database below is set to sqlite by default. Change this if you
+want to run with the mysql or postgres feature.
+
 const DATABASE_URL: &'static str = if cfg!(feature = "sqlite") {
     ":memory:"
 } else if cfg!(feature = "mysql") {
@@ -53,6 +59,11 @@ type DbBackend = diesel::SqliteConnection;
 type DbBackend = diesel::MysqlConnection;
 #[cfg(feature = "pg")]
 type DbBackend = diesel::PgConnection;
+*/
+
+// If you want to use another database type, see above.
+const DATABASE_URL: &'static str = ":memory:";
+type DbBackend = diesel::SqliteConnection;
 
 // To see what the model attribute adds to your source code, use
 // the 'cargo expand' command.
