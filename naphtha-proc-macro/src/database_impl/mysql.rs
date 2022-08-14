@@ -37,16 +37,16 @@ fn impl_database_modifier(
             fn insert(
                 &mut self,
                 conn: &::naphtha::DatabaseConnection<::naphtha::diesel::MysqlConnection>
-                ) -> ::anyhow::Result<()> {
+                ) -> ::naphtha::anyhow::Result<()> {
                 use {
-                    ::anyhow::Context,
+                    ::naphtha::anyhow::Context,
                     ::naphtha::{log, DatabaseModel, diesel::{Connection, RunQueryDsl, ExpressionMethods, Table, QueryDsl}},
                     schema::{#table_name, #table_name::dsl::*},
                 };
                 // preventing duplicate insertion if default primary key gets
                 // changed on database insertion.
                 if self.primary_key() != Self::default_primary_key() {
-                    return Err(::anyhow::anyhow!("Could not update primary key!"));
+                    return Err(::naphtha::anyhow::anyhow!("Could not update primary key!"));
                 }
                 let c = match conn.lock() {
                     Ok(c) => c,
@@ -57,7 +57,7 @@ fn impl_database_modifier(
                             self
                             );
                         log::error!("{}", message);
-                        return Err(::anyhow::anyhow!("{}", message));
+                        return Err(::naphtha::anyhow::anyhow!("{}", message));
                     }
                 };
                 self.pre_insert(conn);
@@ -77,7 +77,7 @@ fn impl_database_modifier(
                             self
                             );
                         log::error!("{}", message);
-                        return Err(::anyhow::anyhow!("{}", message));
+                        return Err(::naphtha::anyhow::anyhow!("{}", message));
                     }
                 };
                 self.set_primary_key(&res_id);
@@ -85,7 +85,7 @@ fn impl_database_modifier(
                 Ok(())
             }
 
-            fn update(&mut self, conn: &::naphtha::DatabaseConnection<::naphtha::diesel::MysqlConnection>) -> ::anyhow::Result<()> {
+            fn update(&mut self, conn: &::naphtha::DatabaseConnection<::naphtha::diesel::MysqlConnection>) -> ::naphtha::anyhow::Result<()> {
                 use ::naphtha::{diesel::SaveChangesDsl, log};
                 let c = match conn.lock() {
                     Ok(c) => c,
@@ -96,7 +96,7 @@ fn impl_database_modifier(
                             self
                             );
                         log::error!("{}", message);
-                        return Err(::anyhow::anyhow!("{}", message));
+                        return Err(::naphtha::anyhow::anyhow!("{}", message));
                     }
                 };
                 self.pre_update(conn);
@@ -109,14 +109,14 @@ fn impl_database_modifier(
                             self
                             );
                         log::error!("{}", message);
-                        return Err(::anyhow::anyhow!("{}", message));
+                        return Err(::naphtha::anyhow::anyhow!("{}", message));
                     },
                 };
                 self.post_update(conn);
                 Ok(())
             }
 
-            fn remove(&mut self, conn: &::naphtha::DatabaseConnection<::naphtha::diesel::MysqlConnection>) -> ::anyhow::Result<()> {
+            fn remove(&mut self, conn: &::naphtha::DatabaseConnection<::naphtha::diesel::MysqlConnection>) -> ::naphtha::anyhow::Result<()> {
                 use {
                     ::naphtha::{log::{self, info}, DatabaseModel, diesel::{ExpressionMethods, RunQueryDsl, QueryDsl, Table}},
                     schema::{#table_name, #table_name::dsl::*},
@@ -130,7 +130,7 @@ fn impl_database_modifier(
                             self
                             );
                         log::error!("{}", message);
-                        return Err(::anyhow::anyhow!("{}", message));
+                        return Err(::naphtha::anyhow::anyhow!("{}", message));
                     }
                 };
                 self.pre_remove(conn);
@@ -151,7 +151,7 @@ fn impl_database_modifier(
                             self
                             );
                         log::error!("{}", message);
-                        return Err(::anyhow::anyhow!("{}", message));
+                        return Err(::naphtha::anyhow::anyhow!("{}", message));
                     }
                 };
                 self.post_remove(conn);
