@@ -17,22 +17,21 @@ jobs:
     services:
       database-mysql:
         image: mysql:latest
-        ports:
-          - 3306:3306
+        ports: ['3306:3306']
         env:
           MYSQL_USER: naphtha
           MYSQL_PASSWORD: naphtha
           MYSQL_DATABASE: naphtha
-        options: --health-cmd="mysqladmin ping" --health-interval=5s --health-timeout=2s --health-retries=3
+        options: --health-cmd "mysqladmin ping" --health-interval 5s --health-timeout 2s --health-retries 3
 
       database-postgres:
         image: postgres:latest
-        ports:
-          - 5432:5432
+        ports: ['5432:5432']
         env:
           POSTGRES_USER: naphtha
           POSTGRES_PASSWORD: naphtha
           POSTGRES_DB: naphtha
+        options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
 
     steps:
     - uses: actions/checkout@v3
