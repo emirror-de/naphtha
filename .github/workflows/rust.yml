@@ -18,7 +18,7 @@ jobs:
       database-mysql:
         image: mysql:latest
         ports:
-          - 3306
+          - 3306:3306
         env:
           MYSQL_USER: naphtha
           MYSQL_PASSWORD: naphtha
@@ -28,7 +28,7 @@ jobs:
       database-postgres:
         image: postgres:latest
         ports:
-          - 5432
+          - 5432:5432
         env:
           POSTGRES_USER: naphtha
           POSTGRES_PASSWORD: naphtha
