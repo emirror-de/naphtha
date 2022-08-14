@@ -9,6 +9,13 @@
 ### Changes
 
 * Improved error handling. The `DatabaseModelModifier` now returns an `anyhow::Result` instead of a plain `bool`
+* Improved internal structure
+* proc-macro implementation now uses the anyhow re-exported crate from naphtha
+
+### Bugfixes
+
+* Fixed wrong import statements in proc macro crate
+* Added missing diesel::Table use statement
 
 ## v0.5.0
 
