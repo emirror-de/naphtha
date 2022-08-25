@@ -28,7 +28,7 @@ pub fn model(
         "proc_macro_attribute model: Could not parse TokenStream input!",
     );
 
-    let params = params::Params::from(attr.clone());
+    let params = params::Params::from(attr);
     let attribute_table_name =
         format!("#[table_name = \"{}\"]", params.table_name);
     let attribute_table_name: ::proc_macro2::TokenStream =

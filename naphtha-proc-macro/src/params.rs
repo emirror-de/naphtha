@@ -55,9 +55,9 @@ impl From<::proc_macro::TokenStream> for Params {
                     match current_ident {
                         Some(i) => {
                             match &i.to_string()[..] {
-                                Self::TABLE_NAME => table_name = Some(literal.replace("\"", "")),
-                                Self::PRIMARY_KEY => primary_key = Some(literal.replace("\"", "")),
-                                _ => panic!("Unknown parameter '{}' given!", i.to_string()),
+                                Self::TABLE_NAME => table_name = Some(literal.replace('\"', "")),
+                                Self::PRIMARY_KEY => primary_key = Some(literal.replace('\"', "")),
+                                _ => panic!("Unknown parameter '{}' given!", i),
                             }
                         }
                         None => panic!("Syntax error in parsing Params struct. Identifier expected."),
@@ -69,16 +69,16 @@ impl From<::proc_macro::TokenStream> for Params {
             }
         }
 
-        let table_name = if let None = table_name {
-            panic!("Missing parameter table_name. Please add it to the model attribute, e.g. table_name = \"my_new_table\"!");
+        let table_name = if let Some(t) = table_name {
+            t
         } else {
-            table_name.unwrap()
+            panic!("Missing parameter table_name. Please add it to the model attribute, e.g. table_name = \"my_new_table\"!");
         };
 
-        let primary_key = if let None = primary_key {
-            panic!("Missing parameter primary_key. Please add it to the model attribute, e.g. primary_key = \"id\"!");
+        let primary_key = if let Some(k) = primary_key {
+            k
         } else {
-            primary_key.unwrap()
+            panic!("Missing parameter primary_key. Please add it to the model attribute, e.g. primary_key = \"id\"!");
         };
 
         Params {

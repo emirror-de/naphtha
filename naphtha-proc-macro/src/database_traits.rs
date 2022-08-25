@@ -22,7 +22,7 @@ pub fn impl_trait_query_by_properties(
             "updated_at" => continue,
             _ => quote! { Vec<Self> },
         };
-        let return_type = if &fieldname.to_string()[..] == params.primary_key {
+        let return_type = if fieldname.to_string()[..] == params.primary_key {
             quote! { Self }
         } else {
             return_type
@@ -80,7 +80,7 @@ fn impl_trait_query_by_primary_keys(
             continue;
         }
         let fieldname = field.ident.as_ref().unwrap();
-        if &fieldname.to_string()[..] != params.primary_key {
+        if fieldname.to_string()[..] != params.primary_key {
             continue;
         }
         let fieldtype = &field.ty;
