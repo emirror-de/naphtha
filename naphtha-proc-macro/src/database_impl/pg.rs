@@ -48,70 +48,74 @@ fn impl_database_modifier(
                 if self.primary_key() != Self::default_primary_key() {
                     return Err(::naphtha::anyhow::anyhow!("Could not update primary key!"));
                 }
-                let c = match conn.lock() {
-                    Ok(c) => c,
-                    Err(msg) => {
-                        let message = format!(
-                            "Could not aquire lock on DatabaseModifier::insert for model:\nError: {}\nModel:\n{:#?}",
-                            msg,
-                            self
-                            );
-                        log::error!("{}", message);
-                        return Err(::naphtha::anyhow::anyhow!("{}", message));
-                    }
-                };
                 self.pre_insert(conn);
-                let res_id = match c.transaction::<_, ::naphtha::diesel::result::Error, _>(|| {
-                    ::naphtha::diesel::insert_into(#table_name)
-                        .values((#insert_properties))
-                        .execute(&*c)?;
-                    #table_name.select(#table_name.primary_key())
-                        .order(#table_name.primary_key().desc())
-                        .first(&*c)
-                }) {
-                    Ok(v) => v,
-                    Err(msg) => {
-                        let message = format!(
-                            "Failed inserting entity:\nError: {}\nModel: {:#?}",
-                            msg,
-                            self
-                            );
-                        log::error!("{}", message);
-                        return Err(::naphtha::anyhow::anyhow!("{}", message));
-                    }
-                };
-                self.set_primary_key(&res_id);
+                {
+                    let c = match conn.lock() {
+                        Ok(c) => c,
+                        Err(msg) => {
+                            let message = format!(
+                                "Could not aquire lock on DatabaseModifier::insert for model:\nError: {}\nModel:\n{:#?}",
+                                msg,
+                                self
+                                );
+                            log::error!("{}", message);
+                            return Err(::naphtha::anyhow::anyhow!("{}", message));
+                        }
+                    };
+                    let res_id = match c.transaction::<_, ::naphtha::diesel::result::Error, _>(|| {
+                        ::naphtha::diesel::insert_into(#table_name)
+                            .values((#insert_properties))
+                            .execute(&*c)?;
+                        #table_name.select(#table_name.primary_key())
+                            .order(#table_name.primary_key().desc())
+                            .first(&*c)
+                    }) {
+                        Ok(v) => v,
+                        Err(msg) => {
+                            let message = format!(
+                                "Failed inserting entity:\nError: {}\nModel: {:#?}",
+                                msg,
+                                self
+                                );
+                            log::error!("{}", message);
+                            return Err(::naphtha::anyhow::anyhow!("{}", message));
+                        }
+                    };
+                    self.set_primary_key(&res_id);
+                }
                 self.post_insert(conn);
                 Ok(())
             }
 
             fn update(&mut self, conn: &::naphtha::DatabaseConnection<::naphtha::diesel::PgConnection>) -> ::naphtha::anyhow::Result<()> {
                 use ::naphtha::{diesel::SaveChangesDsl, log};
-                let c = match conn.lock() {
-                    Ok(c) => c,
-                    Err(msg) => {
-                        let message = format!(
-                            "Could not aquire lock on DatabaseModifier::update for model:\nError: {}\nModel:\n{:#?}",
-                            msg,
-                            self
-                            );
-                        log::error!("{}", message);
-                        return Err(::naphtha::anyhow::anyhow!("{}", message));
-                    }
-                };
                 self.pre_update(conn);
-                match self.save_changes::<Self>(&*c) {
-                    Ok(_) => (),
-                    Err(msg) => {
-                        let message = format!(
-                            "Failed updating entity:\nError: {}\nModel:\n{:#?}",
-                            msg,
-                            self
-                            );
-                        log::error!("{}", message);
-                        return Err(::naphtha::anyhow::anyhow!("{}", message));
-                    },
-                };
+                {
+                    let c = match conn.lock() {
+                        Ok(c) => c,
+                        Err(msg) => {
+                            let message = format!(
+                                "Could not aquire lock on DatabaseModifier::update for model:\nError: {}\nModel:\n{:#?}",
+                                msg,
+                                self
+                                );
+                            log::error!("{}", message);
+                            return Err(::naphtha::anyhow::anyhow!("{}", message));
+                        }
+                    };
+                    match self.save_changes::<Self>(&*c) {
+                        Ok(_) => (),
+                        Err(msg) => {
+                            let message = format!(
+                                "Failed updating entity:\nError: {}\nModel:\n{:#?}",
+                                msg,
+                                self
+                                );
+                            log::error!("{}", message);
+                            return Err(::naphtha::anyhow::anyhow!("{}", message));
+                        },
+                    };
+                }
                 self.post_update(conn);
                 Ok(())
             }
@@ -121,39 +125,41 @@ fn impl_database_modifier(
                     ::naphtha::{log::{self, info}, DatabaseModel, diesel::{ExpressionMethods, RunQueryDsl, QueryDsl, Table}},
                     schema::{#table_name, #table_name::dsl::*},
                 };
-                let c = match conn.lock() {
-                    Ok(c) => c,
-                    Err(msg) => {
-                        let message = format!(
-                            "Could not aquire lock on DatabaseModifier::remove for model:\nError: {}\nModel:\n{:#?}",
-                            msg,
-                            self
-                            );
-                        log::error!("{}", message);
-                        return Err(::naphtha::anyhow::anyhow!("{}", message));
-                    }
-                };
                 self.pre_remove(conn);
-                let num_deleted = ::naphtha::diesel::delete(
-                    #table_name.filter(
-                        #table_name.primary_key().eq(self.primary_key())
-                    )
-                );
-                match num_deleted.execute(&*c) {
-                    Ok(_) => {
-                        #[cfg(debug_assertions)]
-                        info!("Removed entity with primary key {} from database!", self.primary_key());
-                    },
-                    Err(msg) => {
-                        let message = format!(
-                            "Could not remove model from database:\nError: {}\nModel:\n{:#?}",
-                            msg,
-                            self
-                            );
-                        log::error!("{}", message);
-                        return Err(::naphtha::anyhow::anyhow!("{}", message));
-                    }
-                };
+                {
+                    let c = match conn.lock() {
+                        Ok(c) => c,
+                        Err(msg) => {
+                            let message = format!(
+                                "Could not aquire lock on DatabaseModifier::remove for model:\nError: {}\nModel:\n{:#?}",
+                                msg,
+                                self
+                                );
+                            log::error!("{}", message);
+                            return Err(::naphtha::anyhow::anyhow!("{}", message));
+                        }
+                    };
+                    let num_deleted = ::naphtha::diesel::delete(
+                        #table_name.filter(
+                            #table_name.primary_key().eq(self.primary_key())
+                        )
+                    );
+                    match num_deleted.execute(&*c) {
+                        Ok(_) => {
+                            #[cfg(debug_assertions)]
+                            info!("Removed entity with primary key {} from database!", self.primary_key());
+                        },
+                        Err(msg) => {
+                            let message = format!(
+                                "Could not remove model from database:\nError: {}\nModel:\n{:#?}",
+                                msg,
+                                self
+                                );
+                            log::error!("{}", message);
+                            return Err(::naphtha::anyhow::anyhow!("{}", message));
+                        }
+                    };
+                }
                 self.post_remove(conn);
                 Ok(())
             }
