@@ -109,7 +109,9 @@ impl<T> DatabaseUpdateHandler<T> for Person {
         self.updated_at = chrono::Utc::now().naive_utc();
     }
 
-    fn post_update(&mut self, _conn: &DatabaseConnection<T>) {}
+    fn post_update(&mut self, _conn: &DatabaseConnection<T>) {
+        self.description = Some("Post update change!".into());
+    }
 }
 
 impl<T> DatabaseInsertHandler<T> for Person {}
@@ -157,8 +159,13 @@ fn main() {
         updated_at: chrono::Utc::now().naive_utc(),
     };
 
-    p.insert(&db);
+    p.insert(&db).unwrap();
     // id member is set to the correct number given by the database.
+
+    p.description = Some("Updated description.".into());
+    println!("---------------------- Before update:\n{:#?}", p);
+    p.update(&db);
+    println!("---------------------- After update:\n{:#?}", p);
 
     // do a custom query to the database
     let res =
@@ -167,10 +174,13 @@ fn main() {
             persons.filter(entity_id.eq(1)).first(c)
         });
     let queried_by_id = Person::query_by_entity_id(&db, &1);
-    println!("{:#?}", res);
-    println!("{:#?}", queried_by_id);
+    println!("---------------------- Custom query result:\n{:#?}", res);
+    println!(
+        "---------------------- Using query_by_id:\n{:#?}",
+        queried_by_id
+    );
 
-    p.remove(&db);
+    p.remove(&db).unwrap();
     // p not available anymore
 
     #[cfg(any(
